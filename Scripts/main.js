@@ -9,13 +9,17 @@
 	var canvas;
 
 	function init() {
-
+		var loader = new Messenger();
+		loader.addResource("text", "Messenger", "Scripts/Messenger.js");
+		loader.load(function() {
+			console.log(loader.resources.Messenger);
+		});
 		canvas = new Sketch({width: window.innerWidth, height: window.innerHeight});
 
 		var start = Date.now();
 
 		/* STRESS TEST */
-		var numObjects = 10000;
+		var numObjects = 1000;
 		canvas.setShadow({enabled: true, hue: 360, saturation: 50, lightness: 50, blur: 20})
 		canvas.setStroke({hue: 0, saturation: 50, lightness: 50, weight: 1});
 		canvas.setFill({hue: 100, saturation: 50, lightness: 50});

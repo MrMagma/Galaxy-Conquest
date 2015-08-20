@@ -1,7 +1,52 @@
 var Messenger = (function() {
 	
+	var loaders = {
+		image: function(data, messenger) {
+			var img = new Image();
+			img.addEventListener("load", function() {
+				messenger.resources[data.name] = img;
+				messenger._numLoaded += 1;
+				if (messenger._numLoaded >= messenger.resources.length) {
+					messenger.onload();
+				}
+			});
+			img.src = data.src;
+		},
+		sound: function(data, messenger) {
+			var audio = document.createElement("audio");
+			audio.addEventListener("load", function() {
+				messenger.resources[data.name] = audio;
+				messenger._numLoaded += 1;
+				if (messenger._numLoaded >= messenger.resources.length) {
+					messenger.onload();
+				}
+			});
+			audio.src = data.src;
+			document.appendChild(audio);
+		},
+		font: function(data) {
+
+		},
+		text: function(data, messenger) {
+			fetch(data.src).then(function(response) {
+				return response.text();
+			}).then(function(text) {
+				messenger.resources[data.name] = text;
+				messenger._numLoaded += 1;
+				if (messenger._numLoaded >= messenger.resources.length) {
+					console.log("All resources loaded!");
+					messenger.onload();
+				}
+			})
+		}
+	};
+
+
+
 	function Messenger() {
 		this.loadQuene = [];
+		this.resources = {};
+		this._numLoaded = 0;
 	}
 
 	Messenger.prototype = {
@@ -26,9 +71,9 @@ var Messenger = (function() {
 				name: name
 			});
 		},
-		addScript: function(name, src) {
+		addText: function(name, src) {
 			this.loadQuene.push({
-				type: "script",
+				type: "text",
 				src: src,
 				name: name
 			});
@@ -40,56 +85,19 @@ var Messenger = (function() {
 				this.addSound(name, src);
 			} else if (type === "font") {
 				this.addFont(name, src);
-			} else if (type === "script") {
-				this.addScript(name, src);
+			} else {
+				this.addText(name, src);
 			}
 		},
-		load: function() {
+		load: function(onload) {
 			for (var i = 0; i < this.loadQuene.length; i ++) {
-
+				loaders[this.loadQuene[i].type](this.loadQuene[i], this);
 			}
+			this.onload = onload || function() {};
 		}
-	}
-
-
-
-	/*
-	{
-		src
-		loadstart
-		loadend
-		timeout
-		abort
-		load
-		timeout
-		error
-		progress
-		type
-	}
-	*/
-	Messenger.request = function(cfg) {
-		var request = new XMLHttpRequest();
-		request.onloadstart = cfg.loadStart;
-		request.onloadend = cfg.loadEnd;
-		request.ontimeout = cfg.timeout;
-		request.onabort = cfg.abort;
-		request.ontimeout = cfg.timeout;
-		request.onerror = cfg.error;
-		request.onprogress = cfg.progress;
-		request.open(cfg.type, cfg.src);
 	}
 
 
 
 	return Messenger;
 })();
-
-Messenger.request({
-	type: "GET",
-	src: "Styles/main.css",
-	load: function() {
-		for (var i = 0; i < arguments.length; i ++) {
-			console.log(arguments[i]);
-		}
-	}
-})
