@@ -9,7 +9,7 @@ What I need:
 
 
 Stars, UI
-Images, Rectangles (Done), Ellipses (Done), Triangles (Done), Text
+Rectangles (Done), Ellipses (Done), Triangles (Done), Text (Done)
 */
 
 var Sketch = (function() {
@@ -116,7 +116,7 @@ var Sketch = (function() {
 			hue: 0,
 			saturation: 0,
 			lightness: 0,
-			alpha: 0,
+			alpha: 100,
 			weight: 1,
 			cap: "butt",
 			styleString: "hsla(0, 0%, 0%, 1.0)",
@@ -136,10 +136,10 @@ var Sketch = (function() {
 			hue: 0,
 			saturation: 0,
 			lightness: 0,
-			alpha: 0,
+			alpha: 100,
 			offsetX: 0,
 			offsetY: 0,
-			colorString: "hsla(0, 0%, 0%, 0)",
+			styleString: "hsla(0, 0%, 0%, 1)",
 			enabled: false
 		}
 		this.init(cfg);
@@ -158,7 +158,7 @@ var Sketch = (function() {
 			if (f.lightness !== undefined) this.fill.lightness = f.lightness;
 			if (f.alpha !== undefined) this.fill.alpha = f.alpha;
 			if (f.enabled !== undefined) this.fill.enabled = !!(f.enabled);
-			this.fill.styleString = "hsla(" + this.fill.hue + ", " + this.fill.saturation + "%, " + this.fill.lightness + "%, " + (this.fill.alpha / 100);
+			this.fill.styleString = "hsla(" + this.fill.hue + ", " + this.fill.saturation + "%, " + this.fill.lightness + "%, " + (this.fill.alpha / 100) + ")";
 			return this;
 		},
 		setStroke: function(s) {
@@ -169,7 +169,7 @@ var Sketch = (function() {
 			if (s.weight !== undefined) this.stroke.weight = s.weight;
 			if (s.cap !== undefined) this.stroke.cap = s.cap;
 			if (s.enabled !== undefined) this.stroke.enabled = !!(s.enabled);
-			this.stroke.styleString = "hsla(" + this.stroke.hue + ", " + this.stroke.saturation + "%, " + this.stroke.lightness + "%, " + (this.stroke.alpha / 100);
+			this.stroke.styleString = "hsla(" + this.stroke.hue + ", " + this.stroke.saturation + "%, " + this.stroke.lightness + "%, " + (this.stroke.alpha / 100) + ")";
 			return this;
 		},
 		setText: function(t) {
@@ -191,7 +191,8 @@ var Sketch = (function() {
 			if (s.offsetX !== undefined) this.shadow.offsetX = s.offsetX;
 			if (s.offsetY !== undefined) this.shadow.offsetY = s.offsetY;
 			if (s.enabled !== undefined) this.shadow.enabled = !!(s.enabled);
-			this.shadow.styleString = "hsla(" + this.shadow.hue + "%, " + this.shadow.saturation + "%, " + this.shadow.lightness + ", " + (this.shadow.alpha / 100);
+			this.shadow.styleString = "hsla(" + this.shadow.hue + ", " + this.shadow.saturation + "%, " + this.shadow.lightness + "%, " + (this.shadow.alpha / 100) + ")";
+			console.log(this.shadow);
 			return this;
 		},
 		applyStyle: function(context) {
@@ -211,7 +212,7 @@ var Sketch = (function() {
 			}
 			if (this.shadow.enabled) {
 				context.shadowBlur = this.shadow.blur;
-				context.shadowColor = this.shadow.colorString;
+				context.shadowColor = this.shadow.styleString;
 				context.shadowOffsetX = this.shadow.offsetX;
 				context.shadowOffsetY = this.shadow.offsetY;
 			}
@@ -394,6 +395,34 @@ var Sketch = (function() {
 
 
 
+	Sketch.Text = (function() {
+		function Text(cfg) {
+			this.x = cfg.x;
+			this.y = cfg.y;
+			this.text = cfg.text;
+			this.width = cfg.width || Infinity;
+		}
+
+		Text.prototype = mergeObjects(
+			{
+				render: function() {
+					if (Math.abs(this.width) === Infinity || this.width === 0) {
+						this._context.fillText(this.text, this.x, this.y);
+						this._context.strokeText(this.text, this.x, this.y);
+					} else {
+						this._context.fillText(this.text, this.x, this.y, this.width);
+						this._context.strokeText(this.text, this.x, this.y, this.width);
+					}
+				}
+			},
+			new GObject()
+		);
+
+		return Text;
+	})();
+
+
+
 	function Sketch(cfg) {
 		if (typeof cfg === "undefined" || cfg.constructor !== Object) cfg = {};
 		this._canvas = document.createElement("canvas");
@@ -406,6 +435,25 @@ var Sketch = (function() {
 			init: function(cfg) {
 				this._canvas.width = cfg.width || 300;
 				this._canvas.height = cfg.height || 150;
+
+				Object.defineProperties(this, {
+					width: {
+						get: function() {
+							return this._canvas.width;
+						},
+						set: function(v) {
+							this._canvas.width = v;
+						}
+					},
+					height: {
+						get: function() {
+							return this._canvas.height;
+						},
+						set: function(v) {
+							this._canvas.height = v;
+						}
+					}
+				})
 
 				var parent = cfg.parent || document.body;
 				parent.appendChild(this._canvas);
