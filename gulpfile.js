@@ -1,22 +1,23 @@
 var gulp = require("gulp");
 var util = require("gulp-util");
 var concat = require("gulp-concat");
-var babel = require("gulp-babel");
-
-var _ = require("underscore");
-
-var marsDeps = ["node_modules/underscore/underscore-min.js"];
+var browserify = require("gulp-browserify");
+var babelify = require("babelify");
 
 var builds = {
     "build-mars": function() {
-        return gulp.src(_.union(marsDeps, ["Mars/src/**/*.js"]))
-            .pipe(babel())
+        return gulp.src(["Mars/src/**/*.js"])
+            .pipe(browserify({
+                transform: ["babelify"]
+            }))
             .pipe(concat("Mars.js"))
             .pipe(gulp.dest("Mars/build"))
     },
     "build-game": function() {
         return gulp.src(["Game/src/**/*.js"])
-            .pipe(babel())
+            .pipe(browserify({
+                transform: ["babelify"]
+            }))
             .pipe(concat("Game.js"))
             .pipe(gulp.dest("Game/build"))
     }
