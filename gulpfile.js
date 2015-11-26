@@ -48,7 +48,7 @@ gulp.task("build", buildKeys, function() {
 });
 
 gulp.task("test", function() {
-    return gulp.src(["Mars/build/**/*.js", "Game/build/**/*.js"])
+    return gulp.src(["test/**/*.js"])
         .pipe(spawnMocha())
 });
 
