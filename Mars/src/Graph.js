@@ -60,24 +60,24 @@ var Graph = (function() {
     }
     
     class Graph extends GraphObject {
-        constructor(cfg) {
-            
+        constructor(cfg = {}) {
+            super(cfg);
         }
     }
     
     
     
     class Node extends GraphObject {
-        constructor() {
-            
+        constructor(cfg = {}) {
+            super(cfg);
         }
     }
     
     
     
     class Edge extends GraphObject {
-        constructor() {
-            
+        constructor(cfg = {}) {
+            super(cfg);
         }
         connect() {
             

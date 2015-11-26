@@ -3,9 +3,13 @@ var util = require("gulp-util");
 var concat = require("gulp-concat");
 var babel = require("gulp-babel");
 
+var _ = require("underscore");
+
+var marsDeps = ["node_modules/underscore/underscore-min.js"];
+
 var builds = {
     "build-mars": function() {
-        return gulp.src(["Mars/src/**/*.js"])
+        return gulp.src(_.union(marsDeps, ["Mars/src/**/*.js"]))
             .pipe(babel())
             .pipe(concat("Mars.js"))
             .pipe(gulp.dest("Mars/build"))

@@ -1,37 +1,6 @@
 var MarsGame = (function() {
     
-    /* Thank you SO http://stackoverflow.com/a/384380 */
-    function isElement(obj) {
-        if (obj == null) {
-            return false;
-        }
-        try {
-            //Using W3 DOM2 (works for FF, Opera and Chrom)
-            return obj instanceof HTMLElement;
-        }
-        catch(e){
-            //Browsers not supporting W3 DOM2 don't have HTMLElement and
-            //an exception is thrown and we end up here. Testing some
-            //properties that all elements have. (works on IE7)
-            return (typeof obj === "object") &&
-              (obj.nodeType === 1) && (typeof obj.style === "object") &&
-              (typeof obj.ownerDocument === "object");
-        }
-    }
-    
     function Mars(cfg = {}) {
-        if (!isElement(cfg.container)) {
-            console.error("Please provide a container element");
-            return;
-        }
-        let {container,
-            width = container.innerWidth,
-            height = container.innerHeight} = cfg;
-        
-        this.container = container;
-        this.renderer = PIXI.autoDetectRenderer(width, height, {});
-        
-        this.container.appendChild(this.renderer);
         this._fps = 30;
         this._frameInterval = 1000 / this._fps;
     }

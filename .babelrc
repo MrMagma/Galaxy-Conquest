@@ -4,5 +4,6 @@
     ],
     "presets": [
         "es2015"
-    ]
+    ],
+    "compact": true
 }
