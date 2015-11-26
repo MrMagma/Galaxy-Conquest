@@ -3,6 +3,7 @@ var util = require("gulp-util");
 var concat = require("gulp-concat");
 var babel = require("gulp-babel");
 var browserify = require("gulp-browserify");
+var spawnMocha = require("gulp-spawn-mocha");
 
 var builds = {
     "transform-mars-src": function() {
@@ -46,6 +47,11 @@ gulp.task("build", buildKeys, function() {
     
 });
 
-gulp.task("default", ["build"], function() {
+gulp.task("test", function() {
+    return gulp.src(["Mars/build/**/*.js", "Game/build/**/*.js"])
+        .pipe(spawnMocha())
+});
+
+gulp.task("default", ["build", "test"], function() {
     
 });
