@@ -1,0 +1,29 @@
+{
+  "name": "Galaxy-Conquest",
+  "version": "1.0.0",
+  "description": "A cross platform strategy game written using web technologies",
+  "author": "Joshua Gammage <joshuamagma2013@gmail.com>",
+  "contributors": [
+    {
+      "name": "Joshua Gammage",
+      "email": "joshuamagma2013@gmail.com"
+    }
+  ],
+  "bin": {},
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JavascriptFTW/Galaxy-Conquest"
+  },
+  "bugs": {
+    "url": "https://github.com/JavascriptFTW/Galaxy-Conquest/issues"
+  },
+  "keywords": [],
+  "dependencies": {},
+  "devDependencies": {
+    "gulp": "^3.9.0",
+    "gulp-concat": "^2.6.0",
+    "gulp-util": "^3.0.7"
+  },
+  "license": "MIT"
+}
