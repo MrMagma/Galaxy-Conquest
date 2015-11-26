@@ -1,10 +1,12 @@
 var gulp = require("gulp");
 var util = require("gulp-util");
 var concat = require("gulp-concat");
+var babel = require("gulp-babel");
 
 var builds = {
     "build-mars": function() {
         return gulp.src(["Mars/src/**/*.js"])
+            .pipe(babel())
             .pipe(concat("Mars.js"))
             .pipe(gulp.dest("Mars/build"))
     }

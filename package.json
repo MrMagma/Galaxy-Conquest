@@ -21,7 +21,9 @@
   "keywords": [],
   "dependencies": {},
   "devDependencies": {
+    "babel-preset-es2015": "^6.1.18",
     "gulp": "^3.9.0",
+    "gulp-babel": "^6.1.0",
     "gulp-concat": "^2.6.0",
     "gulp-util": "^3.0.7"
   },
