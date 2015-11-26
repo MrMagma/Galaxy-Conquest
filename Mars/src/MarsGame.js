@@ -53,5 +53,6 @@ var MarsGame = (function() {
         }
     };
     
+    module.exports = Mars;
     return Mars;
 })();

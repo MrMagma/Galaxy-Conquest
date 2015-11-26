@@ -92,6 +92,7 @@ var Graph = (function() {
     Graph.Node = Node;
     Graph.Edge = Edge;
     
+    module.exports = Graph;
     return Graph;
     
 })();

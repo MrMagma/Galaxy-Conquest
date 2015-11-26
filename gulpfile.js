@@ -6,19 +6,17 @@ var babelify = require("babelify");
 
 var builds = {
     "build-mars": function() {
-        return gulp.src(["Mars/src/**/*.js"])
+        return gulp.src(["Mars/src/MarsEngine.js"])
             .pipe(browserify({
                 transform: ["babelify"]
             }))
-            .pipe(concat("Mars.js"))
             .pipe(gulp.dest("Mars/build"))
     },
     "build-game": function() {
-        return gulp.src(["Game/src/**/*.js"])
+        return gulp.src(["Game/src/Game.js"])
             .pipe(browserify({
                 transform: ["babelify"]
             }))
-            .pipe(concat("Game.js"))
             .pipe(gulp.dest("Game/build"))
     }
 }
