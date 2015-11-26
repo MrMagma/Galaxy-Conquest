@@ -19,13 +19,16 @@
     "url": "https://github.com/JavascriptFTW/Galaxy-Conquest/issues"
   },
   "keywords": [],
-  "dependencies": {},
+  "dependencies": {
+    "underscore": "^1.8.3"
+  },
   "devDependencies": {
     "babel-preset-es2015": "^6.1.18",
     "gulp": "^3.9.0",
     "gulp-babel": "^6.1.0",
     "gulp-concat": "^2.6.0",
-    "gulp-util": "^3.0.7"
+    "gulp-util": "^3.0.7",
+    "mocha": "^2.3.4"
   },
   "license": "MIT"
 }
