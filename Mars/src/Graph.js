@@ -5,7 +5,7 @@ var Graph = (function() {
     }
     
     Graph.prototype = {
-        data: function() {
+        data() {
             
         }
     };
@@ -17,10 +17,10 @@ var Graph = (function() {
     }
     
     Node.prototype = {
-        data: function() {
+        data() {
             
         },
-        on: function() {
+        change() {
             
         }
     };
@@ -32,16 +32,16 @@ var Graph = (function() {
     }
     
     Edge.prototype = {
-        data: function(data) {
+        data(data) {
             
         },
-        on: function() {
+        change() {
             
         },
-        connect: function(node) {
+        connect(node) {
             
         },
-        unconnect: function(node) {
+        unconnect(node) {
             
         }
     };

@@ -19,16 +19,17 @@ var MarsGame = (function() {
         }
     }
     
-    function Mars(cfg) {
-        cfg = (typeof cfg === "object") ? cfg : {};
+    function Mars(cfg = {}) {
         if (!isElement(cfg.container)) {
             console.error("Please provide a container element");
             return;
         }
-        this.container = cfg.container;
-        this.renderer = PIXI.autoDetectRenderer(
-            cfg.width || cfg.container.innerWidth,
-            cfg.height || cfg.container.innerHeight, {});
+        let {container,
+            width = container.innerWidth,
+            height = container.innerHeight} = cfg;
+        
+        this.container = container;
+        this.renderer = PIXI.autoDetectRenderer(width, height, {});
         
         this.container.appendChild(this.renderer);
         this._fps = 30;
@@ -38,8 +39,8 @@ var MarsGame = (function() {
     Mars.prototype = {
         /* Sets the FPS (if a the value argument is supplied) and returns the
            current FPS no matter what */
-        FPS: function(value) {
-            var type = typeof value;
+        FPS(value) {
+            let type = typeof value;
             if (type === "number" || type === "string") {            
                 if (typeof value === "string") {
                     value = parseInt(value);
@@ -55,30 +56,30 @@ var MarsGame = (function() {
         },
         /* Sets a method to run when the game first starts up, before any resources
            have been loaded */
-        init: function() {
+        init() {
             
         },
         /* Sets a method to run when all resources have been loaded and the game
            is ready to go */
-        load: function() {
+        load() {
             
         },
         /* Sets a method to run whenever progress is made on any resources the
            game has been told to load */
-        progress: function() {
+        progress() {
             
         },
         /* Sets a method to run every frame */
-        update: function() {
+        update() {
             
         },
         /* Method to add a resource to the queue of resources to fetch before
            the game loads */
-        preload: function() {
+        preload() {
             
         },
         /* Method to asynchrynously load a resource */
-        load: function() {
+        load() {
             
         }
     };
