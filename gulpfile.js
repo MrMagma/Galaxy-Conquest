@@ -9,6 +9,12 @@ var builds = {
             .pipe(babel())
             .pipe(concat("Mars.js"))
             .pipe(gulp.dest("Mars/build"))
+    },
+    "build-game": function() {
+        return gulp.src(["Game/src/**/*.js"])
+            .pipe(babel())
+            .pipe(concat("Game.js"))
+            .pipe(gulp.dest("Game/build"))
     }
 }
 
