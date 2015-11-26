@@ -1,5 +1,5 @@
 (function() {
-    var MarsEngine = require("../../Mars/build/MarsEngine.js");
+    var MarsEngine = require("../../../Mars/build/MarsEngine.js");
     
     var FPS = 60;
     var FRAME_INTERVAL = 1000 / FPS;
