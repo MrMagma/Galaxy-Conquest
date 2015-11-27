@@ -134,13 +134,54 @@ var Graph = (function() {
             
             return this;
         }
-        fire(evt, data = {}) {
-            if (typeof this.listeners[evt] !== "undefined") {
-                for (let listener of this.listeners[evt]) {
+        /*
+         Usage:
+         - fire(event, data)
+                Fires the `event` event passing the `data` object to it
+         - fire(events, data)
+                Fires all events in `events` passing the data object to them
+         - fire(json)
+                `json` is a JSON object containing the names of events as keys
+                and the data to pass to them when fired as values
+         */
+        fire(...args) {
+            if (!args.length) {
+                return this;
+            }
+            
+            if (args.length === 1 && typeof args[0] === "object" &&
+                args[0].constructor !== Array) {
+                return this._fireJSON.apply(this, args);
+            }
+            if (args[0].constructor === Array) {
+                return this._fireEvents.apply(this, args);
+            }
+            if (typeof args[0] === "string") {
+                return this._fireEvent.apply(this, args);
+            }
+            
+            return this;
+        }
+        _fireJSON(json) {
+            for (let eventName in json) {
+                if (json.hasOwnProperty(eventName)) {
+                    this._fireEvent(eventName, json[eventName]);
+                }
+            }
+            return this;
+        }
+        _fireEvents(eventNames, data) {
+            for (let eventName of eventNames) {
+                this._fireEvent(eventName, data);
+            }
+            return this;
+        }
+        _fireEvent(eventName, data) {
+            if (this._listeners.hasOwnProperty(eventName)) {
+                for (let listener of this._listeners[eventName]) {
                     listener(data);
                 }
             }
-            
             return this;
         }
         change(listeners) {

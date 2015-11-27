@@ -277,7 +277,93 @@ describe("Mars Engine", function() {
             
             describe("fire", function() {
                 
+                it("should fire an event", function() {
+                    
+                    var graph = new Graph();
+                    
+                    var fired = false;
+                    
+                    graph.on("test", function() {
+                        fired = true;
+                    });
+                    
+                    graph.fire("test");
+                    
+                    assert.equal(fired, true);
+                    
+                });
                 
+                it("should fire an event with data", function() {
+                    
+                    var graph = new Graph();
+                    
+                    graph.on("test", function(data) {
+                        data.theAnswer = 42;    
+                    });
+                    
+                    var evtData = {};
+                    
+                    graph.fire("test", evtData);
+                    
+                    assert.equal(evtData.theAnswer, 42);
+                    
+                });
+                
+                it("should fire multiple events with data", function() {
+                    
+                    var graph = new Graph();
+                    
+                    graph.on("test1", function(data) {
+                        data.calls += 1;
+                    });
+                    
+                    graph.on("test2", function(data) {
+                        data.calls += 1;
+                    });
+                    
+                    graph.on("test3", function(data) {
+                        data.calls += 1;
+                    });
+                    
+                    var evtData = {
+                        calls: 0
+                    };
+                    
+                    graph.fire(["test1", "test2", "test3"], evtData);
+                    
+                    assert.equal(evtData.calls, 3);
+                    
+                });
+                
+                it("should be able to use a JSON object to fire multiple events with data", function() {
+                    
+                    var graph = new Graph();
+                    
+                    graph.on("test1", function(data) {
+                        data.theAnswer = 42;
+                    });
+                    
+                    graph.on("test2", function(data) {
+                        data.theQuestion = "?";
+                    });
+                    
+                    graph.on("test3", function(data) {
+                        data.foo = "bar";
+                    });
+                    
+                    var data1 = {}, data2 = {}, data3 = {};
+                    
+                    graph.fire({
+                        "test1": data1,
+                        "test2": data2,
+                        "test3": data3
+                    });
+                    
+                    assert.equal(data1.theAnswer, 42);
+                    assert.equal(data2.theQuestion, "?");
+                    assert.equal(data3.foo, "bar");
+                    
+                });
                 
             });
             
