@@ -41,6 +41,20 @@ var Graph = (function() {
                 })
             }
         }
+        /*
+         Description:
+            Adds one or more event listeners to this object
+         Usage:
+            on(event, callback)
+                Adds `callback` as a listener for the `event` event
+            on(event, callbacks)
+                Adds all methods within the `callbacks` array as listeners
+                for the `event` event
+            on(json)
+                Uses a `json` object where the keys are event names and the
+                values are event listeners (or arrays of listeners) and Adds
+                them
+         */
         on(...args) {
             if (args.length === 1) {
                 return this._onJSON.apply(this, args);
@@ -85,6 +99,21 @@ var Graph = (function() {
             
             return this;
         }
+        /*
+         Description:
+            Unbinds one or more event listeners from an object
+         Usage:
+            off(event, listener)
+                Removes the listener on the `event` event matching `listener`
+                (if any)
+            off(event, listeners)
+                Unbinds all listeners within the `listeners` array from the
+                `event` event
+            off(json)
+                Uses a JSON object where the keys are event names and the values
+                are event listeners (or groups of them) and remove all listeners
+                from their respective events
+         */
         off(...args) {
             if (args.length === 1) {
                 return this._offJSON.apply(this, args);
@@ -135,12 +164,14 @@ var Graph = (function() {
             return this;
         }
         /*
+         Description:
+            Fires one or more events with optional data
          Usage:
-         - fire(event, data)
+            fire(event, data)
                 Fires the `event` event passing the `data` object to it
-         - fire(events, data)
+            fire(events, data)
                 Fires all events in `events` passing the data object to them
-         - fire(json)
+            fire(json)
                 `json` is a JSON object containing the names of events as keys
                 and the data to pass to them when fired as values
          */
