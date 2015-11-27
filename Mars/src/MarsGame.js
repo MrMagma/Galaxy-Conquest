@@ -13,7 +13,7 @@ var MarsGame = (function() {
             if (type === "number" || type === "string") {            
                 if (typeof value === "string") {
                     value = parseInt(value);
-                    if (window.isNaN(value)) {
+                    if (isNaN(value)) {
                         console.error("Please supply a valid value to the \"FPS\" method");
                         return;
                     }

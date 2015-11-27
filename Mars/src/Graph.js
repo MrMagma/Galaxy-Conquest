@@ -1,5 +1,7 @@
 var Graph = (function() {
     
+    var _ = require("underscore");
+    
     class GraphObject {
         constructor({data = {}, listen = {}, verify = {}, change = {}}) {
             this._listeners = {};
@@ -22,9 +24,8 @@ var Graph = (function() {
         }
         on(evt, callback = () => {}) {
             if (typeof this._listeners[evt] === "undefined" ||
-                window.isNaN(this.listeners[evt]) ||
                 this._listeners[evt].constructor !== Array) {
-                this.listeners[evt] = [];
+                this._listeners[evt] = [];
             }
             
             if (callback.constructor === Function) {
