@@ -236,7 +236,38 @@ describe("Mars Engine", function() {
                     
                     it("should accept an JSON object with event names as keys and callbacks as values for removal", function() {
                         
+                        var graph = new Graph();
                         
+                        var fn1 = function() {
+                            // Function 1
+                        };
+                        
+                        var fn2 = function() {
+                            // Function 2
+                        };
+                        
+                        var fn3 = function() {
+                            // Function 3
+                        };
+                        
+                        var fn4 = function() {
+                            // Function 4
+                        };
+                        
+                        graph.on({
+                            "test1": [fn1, fn2],
+                            "test2": [fn3],
+                            "test3": fn4
+                        });
+                        
+                        graph.off({
+                            "test1": fn2,
+                            "test3": [fn4]
+                        });
+                        
+                        assert.equal(graph._listeners["test3"], undefined);
+                        assert.equal(graph._listeners["test1"].length, 1);
+                        assert.equal(graph._listeners["test1"][0].toString(), fn1.toString());
                         
                     });
                     
