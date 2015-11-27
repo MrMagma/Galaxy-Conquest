@@ -66,6 +66,15 @@ var Graph = (function() {
             
             return this;
         }
+        off(...args) {
+            
+        }
+        _offJSON(json) {
+            
+        }
+        _offEvtCallback() {
+            
+        }
         fire(evt, data = {}) {
             if (typeof this.listeners[evt] !== "undefined") {
                 for (let listener of this.listeners[evt]) {

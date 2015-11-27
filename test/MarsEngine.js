@@ -164,6 +164,86 @@ describe("Mars Engine", function() {
                 
             });
             
+            describe("the `off` method", function() {
+                
+                describe("with 2 arguments (event, callback)", function() {
+                    
+                    it("should remove a single callback", function() {
+                        
+                        var graph = new Graph();
+                        
+                        var fn1 = function() {
+                            // Function 1
+                        };
+                        
+                        graph.on("test", fn1);
+                        
+                        graph.off("test", fn1);
+                        
+                        assert.equal(graph._listeners["test"], undefined);
+                        
+                    });
+                    
+                    it("should remove groups of callbacks", function() {
+                        
+                        var graph = new Graph();
+                        
+                        var fn1 = function() {
+                            // Function 1
+                        };
+                        
+                        var fn2 = function() {
+                            // Function 2
+                        };
+                        
+                        graph.on("test", [fn1, fn2]);
+                        
+                        graph.off("test", [fn2, fn1]);
+                        
+                        assert.equal(graph._listeners["test"], undefined);
+                        
+                    });
+                    
+                    it("should preserve existing callbacks", function() {
+                        
+                        var graph = new Graph();
+                        
+                        var fn1 = function() {
+                            // Function 1
+                        };
+                        
+                        var fn2 = function() {
+                            // Function 2
+                        };
+                        
+                        var fn3 = function() {
+                            // Function 3
+                        };
+                        
+                        graph.on("test", [fn1, fn2, fn3]);
+                        
+                        graph.off("test", [fn1, fn3]);
+                        
+                        assert.equal(typeof graph._listeners["test"], "object");
+                        assert.equal(graph._listeners["test"].length, 1);
+                        assert.equal(graph._listeners["test"][0], fn2.toString());
+                        
+                    });
+                    
+                });
+                
+                describe("with 1 argument (event object)", function() {
+                    
+                    it("should accept an JSON object with event names as keys and callbacks as values for removal", function() {
+                        
+                        
+                        
+                    });
+                    
+                });
+                
+            });
+            
             describe("fire", function() {
                 
                 
