@@ -22,7 +22,34 @@ var Graph = (function() {
             this._data = _.extendOwn(this._data, dat);
             return this;
         }
-        on(evt, callback = () => {}) {
+        on(...args) {
+            if (args.length === 1) {
+                return this._onJSON.apply(this, args);
+            }
+            if (args.length === 2) {
+                return this._onEvtCallback.apply(this, args);
+            }
+            return this;
+        }
+        _onJSON(json) {
+            if (typeof json !== "object") {
+                return this;
+            }
+            
+            for (let evt in json) {
+                if (json.hasOwnProperty(evt)) {
+                    this._onEvtCallback(evt, json[evt]);
+                }
+            }
+            
+            return this;
+        }
+        _onEvtCallback(evt, callback = () => {}) {
+            if (typeof evt !== "string" ||
+                (typeof callback !== "function" && callback.constructor !== Array)) {
+                return this;
+            }
+            
             if (typeof this._listeners[evt] === "undefined" ||
                 this._listeners[evt].constructor !== Array) {
                 this._listeners[evt] = [];
@@ -32,7 +59,9 @@ var Graph = (function() {
                 this._listeners[evt].push(callback)
             } else if(callback.constructor === Array) {
                 this._listeners[evt].push.apply(this._listeners[evt],
-                    callback);
+                    callback.filter(val => {
+                        return (typeof val === "function");
+                    }));
             }
             
             return this;
