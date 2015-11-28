@@ -437,6 +437,113 @@ describe("Mars Engine", function() {
                 
             });
             
+            describe("process", function() {
+                
+                it("should accept simple key-value pairs", function() {
+                    
+                    var graph = new Graph();
+                    
+                    graph.data("test", 2);
+                    
+                    var changed = false;
+                    
+                    graph.process("test", function() {
+                        changed = true;
+                    });
+                    
+                    graph.data("test", 3);
+                    
+                    assert.equal(changed, true);
+                    
+                });
+                
+                it("should accept complex key-value pairs", function() {
+                    
+                    var graph = new Graph();
+                    
+                    graph.data({
+                        "test-chamber": {
+                            "test": 2
+                        }
+                    });
+                    
+                    var changed = false;
+                    
+                    graph.process("test-chamber.test", function() {
+                        changed = true;
+                    });
+                    
+                    graph.data({
+                        "test-chamber": {
+                            "test": 3
+                        }
+                    });
+                    
+                    assert.equal(changed, true);
+                    
+                });
+                
+                it("should be able to map values before they are set", function() {
+                    
+                    var graph = new Graph();
+                    
+                    graph.data("multiple-of-three", 3);
+                    
+                    graph.process("multiple-of-three", function(v) {
+                        return v * 3;
+                    });
+                    
+                    graph.data("multiple-of-three", 2);
+                    
+                    assert.equal(graph._data["multiple-of-three"], 6);
+                    
+                });
+                
+                it("should accept JSON data structures", function() {
+                    
+                    var graph = new Graph();
+                    
+                    graph.data({
+                        "test1": {
+                            "test3": 42
+                        },
+                        "test2": "Hi",
+                        "test4": {
+                            "test5": "Boo"
+                        }
+                    });
+                    
+                    var values = [];
+                    
+                    graph.process({
+                        "test1": {
+                            "test3": function(v) {
+                                values.push(v);
+                            }
+                        },
+                        "test2": function(v) {
+                            values.push(v);
+                        },
+                        "test4": function(v) {
+                            values.push(v);
+                        }
+                    });
+                    
+                    graph.data({
+                        "test1": {
+                            "test3": 43
+                        },
+                        "test2": "Bye",
+                        "test4": null
+                    });
+                    
+                    assert.equal(values.length, 3);
+                    assert.equal(_.union([43, "Bye", null], values).length, 3);
+                    
+                });
+                
+            });
+            
         });
         
         describe("Node", function() {

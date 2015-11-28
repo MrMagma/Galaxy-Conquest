@@ -5,6 +5,7 @@ var Graph = (function() {
     let UIDGenerator = require("./UIDGenerator");
     
     const CALLBACK_UID_KEY = "_mars_graph_callback_uid";
+    const CHANGE_UID_PREFIX = "mars_graph_change_uid_";
     let uidGenerator = new UIDGenerator({
         sequenceLength: 30
     });
@@ -14,7 +15,7 @@ var Graph = (function() {
             this._listeners = {};
             this._data = {};
             this._checks = {};
-            this._changeListeners = {};
+            this._dataListeners = {};
             
             for (let evt in listen) {
                 if (listen.hasOwnProperty(evt)) {
@@ -23,7 +24,7 @@ var Graph = (function() {
             }
             this.data(data);
             this.verify(verify);
-            this.change(change);
+            this.process(change);
         }
         _callbackify(callback) {
             if (typeof callback === "function") {
@@ -229,11 +230,124 @@ var Graph = (function() {
             }
             return this._data;
         }
-        change(listeners) {
-            _.mapObject(listeners, function(value, key) {
-                
-            });
+        process(...args) {
+            if (args.length === 1) {
+                this._processJSON.apply(this, args);
+            } else if (args.length === 2) {
+                this._processKeyValue.apply(this, args);
+            }
             return this;
+        }
+        _processJSON(json, path = "") {
+            for (let key in json) {
+                if (json.hasOwnProperty(key)) {
+                    let valPath = path;
+                    if (valPath.length) {
+                        valPath += ".";
+                    }
+                    valPath += key;
+                    
+                    if (_.isFunction(json[key]) || _.isArray(json[key])) {
+                        this._processKeyValue(valPath, json[key]);
+                    } else if (_.isObject(json[key])) {
+                        this._processJSON(json[key], valPath);
+                    }
+                }
+            }
+        }
+        _processKeyValue(key, listeners) {
+            if (typeof key !== "string") {
+                return this;
+            }
+            
+            if (listeners.constructor !== Array) {
+                listeners = [listeners];
+            }
+            
+            listeners = listeners.filter(val => {
+                return _.isFunction(val);
+            });
+            
+            let path = key;
+            
+            let setKey = `${CHANGE_UID_PREFIX}${path}_set`;
+            let getKey = `${CHANGE_UID_PREFIX}${path}_get`;
+            let verifyKey = `${CHANGE_UID_PREFIX}${path}_verify`;
+            
+            if (this._checks[verifyKey] === undefined) {
+                this._checks[verifyKey] = [];
+            }
+            if (this._checks[getKey] === undefined) {
+                this._checks[getKey] = [];
+            }
+            
+            if (this._dataListeners[setKey] !== undefined) {
+                this._dataListeners[setKey].push.apply(
+                    this._dataListeners[setKey], listeners);
+            } else {
+                this._dataListeners[setKey] = listeners;
+                
+                key = key.split(".");
+                let ref = this._data;
+                
+                while(key.length > 1 && ref !== undefined) {
+                    ref = ref[key.shift()];
+                }
+                
+                if (ref !== undefined) {
+                    key = key.shift();
+                    
+                    this._attachAccessors(ref, key, path, [
+                        getKey,
+                        setKey,
+                        verifyKey
+                    ]);
+                }
+            }
+        }
+        _attachAccessors(ref, key, path, [getKey, setKey, verifyKey]) {
+            let val = ref[key];
+            
+            Object.defineProperty(ref, key, {
+                set: (function(nVal) {
+                    if (this._checks[verifyKey] !== undefined) {
+                        for (let check of this._checks[verifyKey]) {
+                            if (!check(nVal)) {
+                                return;
+                            }
+                        }
+                    }
+                    
+                    if (this._dataListeners[setKey] !== undefined) {
+                        for (let processor of this._dataListeners[setKey]) {
+                            let possible = processor(nVal);
+                            
+                            if (possible !== undefined) {
+                                nVal = possible;
+                            }
+                        }
+                    }
+                    
+                    val = nVal;
+                }).bind(this),
+                get: (function() {
+                    let retVal = val;
+                    
+                    if (this._dataListeners[getKey] !== undefined) {
+                        for (fetcher of this._dataListeners[getKey]) {
+                            retVal = fetchers(val);
+                        }
+                    }
+                    
+                    return retVal;
+                }).bind(this)
+            })
+        }
+        fetch() {
+            
+        }
+        processSet() {
+            
         }
         verify(checks) {
             _.mapObject(checks, function(value, key) {
