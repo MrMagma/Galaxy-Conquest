@@ -25,24 +25,6 @@ var Graph = (function() {
             this.verify(verify);
             this.change(change);
         }
-        data() {
-            if (arguments.length === 1) {
-                let dat = arguments[0];
-                this._data = _.merge(this._data, dat);
-                console.log(this._data);
-            } else if (arguments.length >= 2) {
-                let [key, value] = arguments;
-                key = key.split(".");
-                let ref = this._data;
-                while (key.length > 1 && ref !== undefined) {
-                    ref = ref[key.shift()];
-                }
-                if (ref !== undefined) {
-                    ref[key.shift()] = value;
-                }
-            }
-            return this._data;
-        }
         _callbackify(callback) {
             if (typeof callback === "function") {
                 if (!callback[CALLBACK_UID_KEY]) {
@@ -92,7 +74,7 @@ var Graph = (function() {
             
             return this;
         }
-        _onEvtCallback(evt, callback = () => {}) {
+        _onEvtCallback(evt, callback) {
             if (typeof evt !== "string" ||
                 (typeof callback !== "function" && callback.constructor !== Array)) {
                 return this;
@@ -229,6 +211,23 @@ var Graph = (function() {
                 }
             }
             return this;
+        }
+        data() {
+            if (arguments.length === 1) {
+                let dat = arguments[0];
+                this._data = _.merge(this._data, dat);
+            } else if (arguments.length >= 2) {
+                let [key, value] = arguments;
+                key = key.split(".");
+                let ref = this._data;
+                while (key.length > 1 && ref !== undefined) {
+                    ref = ref[key.shift()];
+                }
+                if (ref !== undefined) {
+                    ref[key.shift()] = value;
+                }
+            }
+            return this._data;
         }
         change(listeners) {
             _.mapObject(listeners, function(value, key) {
