@@ -367,6 +367,76 @@ describe("Mars Engine", function() {
                 
             });
             
+            describe("data", function() {
+                
+                it("should accept simple key-value pairs", function() {
+                    
+                    var graph = new Graph();
+                    
+                    graph.data("test", 42);
+                    
+                    assert.equal(graph._data["test"], 42);
+                    
+                });
+                
+                it("should accept complex key-value pairs", function() {
+                    
+                    var graph = new Graph();
+                    
+                    graph.data("top-test", {});
+                    
+                    graph.data("top-test.test", 2);
+                    
+                    assert.notEqual(graph._data["top-test"], undefined);
+                    assert.equal(graph._data["top-test"]["test"], 2);
+                    
+                });
+                
+                it("should accept JSON data replacement structures", function() {
+                    
+                    var graph = new Graph();
+                    
+                    graph.data({
+                        foo: "bar",
+                        baz: {
+                            theAnswer: 42
+                        }
+                    });
+                    
+                    assert.equal(graph._data["foo"], "bar");
+                    assert.notEqual(graph._data["baz"], undefined);
+                    assert.equal(graph._data["baz"]["theAnswer"], 42);
+                    
+                });
+                
+                it("should overwrite existing data", function() {
+                    
+                    var graph = new Graph();
+                    
+                    graph.data({
+                        foo: "bar",
+                        baz: {
+                            theAnswer: 42,
+                            theQuestion: "?"
+                        }
+                    });
+                    
+                    graph.data("baz.theQuestion", "What is this?");
+                    graph.data({
+                        foo: "baz",
+                        baz: {
+                            theAnswer: "Trollololol"
+                        }
+                    });
+                    
+                    assert.equal(graph._data["baz"]["theQuestion"], "What is this?");
+                    assert.equal(graph._data["foo"], "baz");
+                    assert.equal(graph._data["baz"]["theAnswer"], "Trollololol");
+                    
+                });
+                
+            });
+            
         });
         
         describe("Node", function() {

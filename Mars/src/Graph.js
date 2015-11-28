@@ -1,6 +1,7 @@
 var Graph = (function() {
     
-    let _ = require("underscore");
+    let _ = require("./underscore-extended.js");
+    
     let UIDGenerator = require("./UIDGenerator");
     
     const CALLBACK_UID_KEY = "_mars_graph_callback_uid";
@@ -24,9 +25,23 @@ var Graph = (function() {
             this.verify(verify);
             this.change(change);
         }
-        data(dat) {
-            this._data = _.extendOwn(this._data, dat);
-            return this;
+        data() {
+            if (arguments.length === 1) {
+                let dat = arguments[0];
+                this._data = _.merge(this._data, dat);
+                console.log(this._data);
+            } else if (arguments.length >= 2) {
+                let [key, value] = arguments;
+                key = key.split(".");
+                let ref = this._data;
+                while (key.length > 1 && ref !== undefined) {
+                    ref = ref[key.shift()];
+                }
+                if (ref !== undefined) {
+                    ref[key.shift()] = value;
+                }
+            }
+            return this._data;
         }
         _callbackify(callback) {
             if (typeof callback === "function") {
