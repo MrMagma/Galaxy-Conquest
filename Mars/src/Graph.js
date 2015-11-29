@@ -13,7 +13,7 @@ var Graph = (function() {
     var GraphObject = (function() {
         
         function callbackify(callback) {
-            if (typeof callback === "function") {
+            if (_.isFunction(callback)) {
                 if (!callback[CALLBACK_UID_KEY]) {
                     callback[CALLBACK_UID_KEY] = uidGenerator.generate();
                 }
@@ -66,7 +66,7 @@ var Graph = (function() {
                 return this;
             }
             _onJSON(json) {
-                if (typeof json !== "object") {
+                if (!_.isObject(json)) {
                     return this;
                 }
                 
@@ -79,7 +79,7 @@ var Graph = (function() {
                 return this;
             }
             _onEvtCallback(evt, callbacks) {
-                if (typeof evt !== "string" || typeof callbacks === "undefined") {
+                if (!_.isString(evt) || _.isUndefined(callbacks)) {
                     return this;
                 }
                 
@@ -95,7 +95,7 @@ var Graph = (function() {
                     return this;
                 }
                 
-                if (typeof this._listeners[evt] === "undefined" ||
+                if (_.isUndefined(this._listeners[evt]) ||
                     this._listeners[evt].constructor !== Array) {
                     this._listeners[evt] = [];
                 }
@@ -129,7 +129,7 @@ var Graph = (function() {
                 return this;
             }
             _offJSON(json) {
-                if (typeof json !== "object") {
+                if (!_.isObject(json)) {
                     return this;
                 }
                 
@@ -187,14 +187,14 @@ var Graph = (function() {
                     return this;
                 }
                 
-                if (args.length === 1 && typeof args[0] === "object" &&
+                if (args.length === 1 && _.isObject(args[0]) &&
                     args[0].constructor !== Array) {
                     return this._fireJSON.apply(this, args);
                 }
                 if (args[0].constructor === Array) {
                     return this._fireEvents.apply(this, args);
                 }
-                if (typeof args[0] === "string") {
+                if (_.isString(args[0])) {
                     return this._fireEvent.apply(this, args);
                 }
                 
@@ -231,7 +231,7 @@ var Graph = (function() {
                 return this._data;
             }
             _dataKeyValue(path, value) {
-                if (typeof path !== "string") {
+                if (!_.isString(path)) {
                     return this;
                 }
                 
@@ -267,7 +267,7 @@ var Graph = (function() {
                 }
             }
             _processKeyValue(path, listeners) {
-                if (typeof path !== "string") {
+                if (!_.isString(path)) {
                     return this;
                 }
                 
@@ -322,7 +322,7 @@ var Graph = (function() {
                 }
             }
             _checkKey(path, checks) {
-                if (typeof path !== "string" || typeof checks === "undefined") {
+                if (!_.isString(path) || _.isUndefined(checks)) {
                     return this;
                 }
                 
@@ -331,7 +331,7 @@ var Graph = (function() {
                 }
                 
                 checks = checks.filter(val => {
-                    return (typeof val === "function");
+                    return (_.isFunction(val));
                 });
                 
                 let [getKey, setKey, verifyKey, init] = this._checkKeys(path);
