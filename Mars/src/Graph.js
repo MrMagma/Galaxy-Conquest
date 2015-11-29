@@ -56,12 +56,12 @@ var Graph = (function() {
                     values are event listeners (or arrays of listeners) and Adds
                     them
              */
-            on(...args) {
-                if (args.length === 1) {
-                    return this._onJSON.apply(this, args);
+            on() {
+                if (arguments.length === 1) {
+                    return this._onJSON.apply(this, arguments);
                 }
-                if (args.length >= 2) {
-                    return this._onEvtCallback.apply(this, args);
+                if (arguments.length >= 2) {
+                    return this._onEvtCallback.apply(this, arguments);
                 }
                 return this;
             }
@@ -119,12 +119,12 @@ var Graph = (function() {
                     are event listeners (or groups of them) and remove all listeners
                     from their respective events
              */
-            off(...args) {
-                if (args.length === 1) {
-                    return this._offJSON.apply(this, args);
+            off() {
+                if (arguments.length === 1) {
+                    return this._offJSON.apply(this, arguments);
                 }
-                if (args.length >= 2) {
-                    return this._offEvtCallback.apply(this, args);
+                if (arguments.length >= 2) {
+                    return this._offEvtCallback.apply(this, arguments);
                 }
                 return this;
             }
@@ -182,20 +182,20 @@ var Graph = (function() {
                     `json` is a JSON object containing the names of events as keys
                     and the data to pass to them when fired as values
              */
-            fire(...args) {
-                if (!args.length) {
+            fire() {
+                if (!arguments.length) {
                     return this;
                 }
                 
-                if (args.length === 1 && _.isObject(args[0]) &&
-                    args[0].constructor !== Array) {
-                    return this._fireJSON.apply(this, args);
+                if (arguments.length === 1 && _.isObject(arguments[0]) &&
+                    arguments[0].constructor !== Array) {
+                    return this._fireJSON.apply(this, arguments);
                 }
-                if (args[0].constructor === Array) {
-                    return this._fireEvents.apply(this, args);
+                if (arguments[0].constructor === Array) {
+                    return this._fireEvents.apply(this, arguments);
                 }
-                if (_.isString(args[0])) {
-                    return this._fireEvent.apply(this, args);
+                if (_.isString(arguments[0])) {
+                    return this._fireEvent.apply(this, arguments);
                 }
                 
                 return this;
@@ -241,11 +241,11 @@ var Graph = (function() {
                     ref[key] = value;
                 }
             }
-            process(...args) {
-                if (args.length === 1) {
-                    this._processJSON.apply(this, args);
-                } else if (args.length === 2) {
-                    this._processKeyValue.apply(this, args);
+            process() {
+                if (arguments.length === 1) {
+                    this._processJSON.apply(this, arguments);
+                } else if (arguments.length === 2) {
+                    this._processKeyValue.apply(this, arguments);
                 }
                 return this;
             }
@@ -296,11 +296,11 @@ var Graph = (function() {
             fetch() {
                 
             }
-            check(...args) {
-                if (args.length === 1) {
-                    this._checkJSON.apply(this, args);
-                } else if (args.length === 2) {
-                    this._checkKey.apply(this, args);
+            check() {
+                if (arguments.length === 1) {
+                    this._checkJSON.apply(this, arguments);
+                } else if (arguments.length === 2) {
+                    this._checkKey.apply(this, arguments);
                 }
                 return this;
             }
