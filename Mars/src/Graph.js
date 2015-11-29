@@ -214,20 +214,22 @@ var Graph = (function() {
         }
         data() {
             if (arguments.length === 1) {
-                let dat = arguments[0];
-                this._data = _.merge(this._data, dat);
+                this._data = _.merge(this._data, arguments[0]);
             } else if (arguments.length >= 2) {
-                let [key, value] = arguments;
-                key = key.split(".");
-                let ref = this._data;
-                while (key.length > 1 && ref !== undefined) {
-                    ref = ref[key.shift()];
-                }
-                if (ref !== undefined) {
-                    ref[key.shift()] = value;
-                }
+                this._dataKeyValue.apply(this, arguments);
             }
             return this._data;
+        }
+        _dataKeyValue(path, value) {
+            if (typeof path !== "string") {
+                return this;
+            }
+            
+            let {ref, key} = _.getPathData(this._data, path);
+            
+            if (ref !== undefined) {
+                ref[key] = value;
+            }
         }
         process(...args) {
             if (args.length === 1) {
@@ -254,8 +256,8 @@ var Graph = (function() {
                 }
             }
         }
-        _processKeyValue(key, listeners) {
-            if (typeof key !== "string") {
+        _processKeyValue(path, listeners) {
+            if (typeof path !== "string") {
                 return this;
             }
             
@@ -267,22 +269,13 @@ var Graph = (function() {
                 return _.isFunction(val);
             });
             
-            let path = key;
-            
             let [getKey, setKey, verifyKey, init] = this._checkKeys(path);
             
             this._checks[setKey].push.apply(this._checks[setKey], listeners);
             
-            key = key.split(".");
-            let ref = this._data;
-            
-            while(key.length > 1 && ref !== undefined) {
-                ref = ref[key.shift()];
-            }
+            let {ref, key} = _.getPathData(this._data, path);
             
             if (ref !== undefined && init) {
-                key = key.shift();
-                
                 this._attachAccessors(ref, key, path, [
                     getKey,
                     setKey,
@@ -318,8 +311,8 @@ var Graph = (function() {
                 }
             }
         }
-        _checkKey(key, checks) {
-            if (typeof key !== "string" || typeof checks === "undefined") {
+        _checkKey(path, checks) {
+            if (typeof path !== "string" || typeof checks === "undefined") {
                 return this;
             }
             
@@ -331,22 +324,13 @@ var Graph = (function() {
                 return (typeof val === "function");
             });
             
-            let path = key;
-            
             let [getKey, setKey, verifyKey, init] = this._checkKeys(path);
             
             this._checks[verifyKey].push.apply(this._checks[verifyKey], checks);
             
-            key = key.split(".");
-            let ref = this._data;
-            
-            while(key.length > 1 && ref !== undefined) {
-                ref = ref[key.shift()];
-            }
+            let {ref, key} = _.getPathData(this._data, path);
             
             if (ref !== undefined && init) {
-                key = key.shift();
-                
                 this._attachAccessors(ref, key, path, [
                     getKey,
                     setKey,
