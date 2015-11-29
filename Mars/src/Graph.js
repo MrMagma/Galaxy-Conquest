@@ -141,28 +141,30 @@ var Graph = (function() {
                 
                 return this;
             }
-            _offEvtCallback(evt, callback) {
+            _offEvtCallback(evt, callbacks = []) {
                 if (this._listeners[evt] === undefined) {
                     return this;
                 }
                 
-                if (typeof callback === "function") {
-                    if (!callback[CALLBACK_UID_KEY]) {
-                        return this;
-                    }
-                    let callbackUid = callback[CALLBACK_UID_KEY];
+                if (callbacks.constructor !== Array) {
+                    callbacks = [callbacks];
+                }
+                
+                callbacks = callbacks.filter(val => {
+                    return (_.isFunction(val) && val[CALLBACK_UID_KEY]);
+                });
+                
+                for (let listener of callbacks) {
+                    let uid = listener[CALLBACK_UID_KEY];
+                    
                     let filtered = this._listeners[evt].filter(val => {
-                        return (val[CALLBACK_UID_KEY] !== callbackUid);
+                        return (val[CALLBACK_UID_KEY] !== uid);
                     });
                     
                     if (!filtered.length) {
                         delete this._listeners[evt];
                     } else {
                         this._listeners[evt] = filtered;
-                    }
-                } else if (callback.constructor === Array) {
-                    for (let listener of callback) {
-                        this._offEvtCallback(evt, listener);
                     }
                 }
                 
