@@ -439,7 +439,7 @@ describe("Mars Engine", function() {
             
             describe("process", function() {
                 
-                it("should accept simple key-value pairs", function() {
+                it("should accept simple keys", function() {
                     
                     var graph = new Graph();
                     
@@ -457,7 +457,7 @@ describe("Mars Engine", function() {
                     
                 });
                 
-                it("should accept complex key-value pairs", function() {
+                it("should accept complex keys", function() {
                     
                     var graph = new Graph();
                     
@@ -539,6 +539,87 @@ describe("Mars Engine", function() {
                     
                     assert.equal(values.length, 3);
                     assert.equal(_.union([43, "Bye", null], values).length, 3);
+                    
+                });
+                
+            });
+            
+            describe("check", function() {
+                
+                it("should accept simple keys to verify data", function() {
+                    
+                    var graph = new Graph();
+                    
+                    graph.data("big-number", 400);
+                    
+                    graph.check("big-number", function(v) {
+                        return v > 300;
+                    });
+                    
+                    graph.data("big-number", 200);
+                    
+                    assert.notEqual(graph._data["big-number"], 200);
+                    
+                });
+                
+                it("should accept complex keys to verify data", function() {
+                    
+                    var graph = new Graph();
+                    
+                    graph.data({
+                        bigNumbers: {
+                            bigNumber: 400
+                        }
+                    });
+                    
+                    graph.check("bigNumbers.bigNumber", function(v) {
+                        return v > 300;
+                    });
+                    
+                    graph.data("bigNumbers.bigNumber", 200);
+                    
+                    assert.notEqual(graph._data["bigNumbers"]["bigNumber"], 200);
+                    
+                });
+                
+                it("should accept JSON structures to verify data", function() {
+                    
+                    var graph = new Graph();
+                    
+                    graph.data({
+                        string: "Hi",
+                        bigNumbers: {
+                            bigNumber: 400,
+                            biggerNumber: 2000
+                        },
+                        smallNumber: 2
+                    });
+                    
+                    graph.check({
+                        string: function(v) {
+                            return (typeof v === "string");
+                        },
+                        bigNumbers: {
+                            biggerNumber: function(v) {
+                                return (v > 1000);
+                            }
+                        },
+                        smallNumber: function(v) {
+                            return (v < 10);
+                        }
+                    });
+                    
+                    graph.data({
+                        string: 42,
+                        bigNumbers: {
+                            biggerNumber: 100
+                        },
+                        smallNumber: 1000
+                    });
+                    
+                    assert.notEqual(graph._data["string"], 42);
+                    assert.notEqual(graph._data["bigNumbers"]["biggerNumbers"], 100);
+                    assert.notEqual(graph._data["smallNumber"], 1000);
                     
                 });
                 

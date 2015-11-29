@@ -11,11 +11,10 @@ var Graph = (function() {
     });
     
     class GraphObject {
-        constructor({data = {}, listen = {}, verify = {}, change = {}}) {
+        constructor({data = {}, listen = {}, checks = {}, change = {}}) {
             this._listeners = {};
             this._data = {};
             this._checks = {};
-            this._dataListeners = {};
             
             for (let evt in listen) {
                 if (listen.hasOwnProperty(evt)) {
@@ -23,7 +22,7 @@ var Graph = (function() {
                 }
             }
             this.data(data);
-            this.verify(verify);
+            this.check(checks);
             this.process(change);
         }
         _callbackify(callback) {
@@ -270,40 +269,113 @@ var Graph = (function() {
             
             let path = key;
             
+            let [getKey, setKey, verifyKey, init] = this._checkKeys(path);
+            
+            this._checks[setKey].push.apply(this._checks[setKey], listeners);
+            
+            key = key.split(".");
+            let ref = this._data;
+            
+            while(key.length > 1 && ref !== undefined) {
+                ref = ref[key.shift()];
+            }
+            
+            if (ref !== undefined && init) {
+                key = key.shift();
+                
+                this._attachAccessors(ref, key, path, [
+                    getKey,
+                    setKey,
+                    verifyKey
+                ]);
+            }
+        }
+        fetch() {
+            
+        }
+        check(...args) {
+            if (args.length === 1) {
+                this._checkJSON.apply(this, args);
+            } else if (args.length === 2) {
+                this._checkKey.apply(this, args);
+            }
+            return this;
+        }
+        _checkJSON(json, path = "") {
+            for (let key in json) {
+                if (json.hasOwnProperty(key)) {
+                    let valPath = path;
+                    if (valPath.length) {
+                        valPath += ".";
+                    }
+                    valPath += key;
+                    
+                    if (_.isFunction(json[key]) || _.isArray(json[key])) {
+                        this._checkKey(valPath, json[key]);
+                    } else if (_.isObject(json[key])) {
+                        this._checkJSON(json[key], valPath);
+                    }
+                }
+            }
+        }
+        _checkKey(key, checks) {
+            if (typeof key !== "string" || typeof checks === "undefined") {
+                return this;
+            }
+            
+            if (checks.constructor !== Array) {
+                checks = [checks];
+            }
+            
+            checks = checks.filter(val => {
+                return (typeof val === "function");
+            });
+            
+            let path = key;
+            
+            let [getKey, setKey, verifyKey, init] = this._checkKeys(path);
+            
+            this._checks[verifyKey].push.apply(this._checks[verifyKey], checks);
+            
+            key = key.split(".");
+            let ref = this._data;
+            
+            while(key.length > 1 && ref !== undefined) {
+                ref = ref[key.shift()];
+            }
+            
+            if (ref !== undefined && init) {
+                key = key.shift();
+                
+                this._attachAccessors(ref, key, path, [
+                    getKey,
+                    setKey,
+                    verifyKey
+                ]);
+            }            
+            
+            return this;
+        }
+        _checkKeys(path) {
             let setKey = `${CHANGE_UID_PREFIX}${path}_set`;
             let getKey = `${CHANGE_UID_PREFIX}${path}_get`;
             let verifyKey = `${CHANGE_UID_PREFIX}${path}_verify`;
+            let init = false;
             
             if (this._checks[verifyKey] === undefined) {
+                init = true;
                 this._checks[verifyKey] = [];
             }
             if (this._checks[getKey] === undefined) {
+                init = true;
                 this._checks[getKey] = [];
             }
-            
-            if (this._dataListeners[setKey] !== undefined) {
-                this._dataListeners[setKey].push.apply(
-                    this._dataListeners[setKey], listeners);
-            } else {
-                this._dataListeners[setKey] = listeners;
-                
-                key = key.split(".");
-                let ref = this._data;
-                
-                while(key.length > 1 && ref !== undefined) {
-                    ref = ref[key.shift()];
-                }
-                
-                if (ref !== undefined) {
-                    key = key.shift();
-                    
-                    this._attachAccessors(ref, key, path, [
-                        getKey,
-                        setKey,
-                        verifyKey
-                    ]);
-                }
+            if (this._checks[setKey] === undefined) {
+                init = true;
+                this._checks[setKey] = [];
             }
+            
+            return [getKey, setKey, verifyKey, init];
         }
         _attachAccessors(ref, key, path, [getKey, setKey, verifyKey]) {
             let val = ref[key];
@@ -318,8 +390,8 @@ var Graph = (function() {
                         }
                     }
                     
-                    if (this._dataListeners[setKey] !== undefined) {
-                        for (let processor of this._dataListeners[setKey]) {
+                    if (this._checks[setKey] !== undefined) {
+                        for (let processor of this._checks[setKey]) {
                             let possible = processor(nVal);
                             
                             if (possible !== undefined) {
@@ -333,8 +405,8 @@ var Graph = (function() {
                 get: (function() {
                     let retVal = val;
                     
-                    if (this._dataListeners[getKey] !== undefined) {
-                        for (fetcher of this._dataListeners[getKey]) {
+                    if (this._checks[getKey] !== undefined) {
+                        for (fetcher of this._checks[getKey]) {
                             retVal = fetchers(val);
                         }
                     }
@@ -342,18 +414,6 @@ var Graph = (function() {
                     return retVal;
                 }).bind(this)
             })
-        }
-        fetch() {
-            
-        }
-        processSet() {
-            
-        }
-        verify(checks) {
-            _.mapObject(checks, function(value, key) {
-                
-            });
-            return this;
         }
     }
     
