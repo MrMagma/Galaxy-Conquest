@@ -108,6 +108,33 @@ var Graph = (function() {
                 }
                 
                 return this;
+            },
+            fireJSON(json) {
+                for (let eventName in json) {
+                    if (json.hasOwnProperty(eventName)) {
+                        _proto.fireEvent.call(this, eventName, json[eventName]);
+                    }
+                }
+                return this;
+            },
+            fireEvent(eventNames, data) {
+                if (!_.isArray(eventNames)) {
+                    eventNames = [eventNames];
+                }
+                
+                eventNames = eventNames.filter(val => {
+                    return (_.isString(val));
+                });
+                
+                for (let evtName of eventNames) {
+                    if (this._listeners.hasOwnProperty(evtName)) {
+                        for (let listener of this._listeners[evtName]) {
+                            listener(data);
+                        }
+                    }
+                }
+                
+                return this;
             }
         };
         
@@ -187,36 +214,9 @@ var Graph = (function() {
              */
             fire() {
                 if (arguments.length === 1 && _.isObject(arguments[0])) {
-                    this._fireJSON.apply(this, arguments);
+                    _proto.fireJSON.apply(this, arguments);
                 } else if (arguments.length >= 1) {
-                    this._fireEvent.apply(this, arguments);
-                }
-                
-                return this;
-            }
-            _fireJSON(json) {
-                for (let eventName in json) {
-                    if (json.hasOwnProperty(eventName)) {
-                        this._fireEvent(eventName, json[eventName]);
-                    }
-                }
-                return this;
-            }
-            _fireEvent(eventNames, data) {
-                if (!_.isArray(eventNames)) {
-                    eventNames = [eventNames];
-                }
-                
-                eventNames = eventNames.filter(val => {
-                    return (_.isString(val));
-                });
-                
-                for (let evtName of eventNames) {
-                    if (this._listeners.hasOwnProperty(evtName)) {
-                        for (let listener of this._listeners[evtName]) {
-                            listener(data);
-                        }
-                    }
+                    _proto.fireEvent.apply(this, arguments);
                 }
                 
                 return this;
