@@ -27,6 +27,48 @@ var Graph = (function() {
             return callback;
         };
         
+        let _proto = {
+            onJSON(json) {
+                if (!_.isObject(json)) {
+                    return this;
+                }
+                
+                for (let evt in json) {
+                    if (json.hasOwnProperty(evt)) {
+                        _proto.onEvtCallback.call(this, evt, json[evt]);
+                    }
+                }
+                
+                return this;
+            },
+            onEvtCallback(evt, callbacks) {
+                if (!_.isString(evt) || _.isUndefined(callbacks)) {
+                    return this;
+                }
+                
+                if (callbacks.constructor !== Array) {
+                    callbacks = [callbacks];
+                }
+                
+                callbacks = callbacks.filter(val => {
+                    return _.isFunction(val);
+                }).map(callbackify);
+                
+                if (!callbacks.length) {
+                    return this;
+                }
+                
+                if (_.isUndefined(this._listeners[evt]) ||
+                    this._listeners[evt].constructor !== Array) {
+                    this._listeners[evt] = [];
+                }
+                
+                this._listeners[evt].push.apply(this._listeners[evt], callbacks);
+                
+                return this;
+            }
+        };
+        
         class GraphObject {
             constructor({data = {}, listen = {}, checks = {}, change = {}}) {
                 this._listeners = {};
@@ -58,50 +100,11 @@ var Graph = (function() {
              */
             on() {
                 if (arguments.length === 1) {
-                    return this._onJSON.apply(this, arguments);
+                    return _proto.onJSON.apply(this, arguments);
                 }
                 if (arguments.length >= 2) {
-                    return this._onEvtCallback.apply(this, arguments);
+                    return _proto.onEvtCallback.apply(this, arguments);
                 }
-                return this;
-            }
-            _onJSON(json) {
-                if (!_.isObject(json)) {
-                    return this;
-                }
-                
-                for (let evt in json) {
-                    if (json.hasOwnProperty(evt)) {
-                        this._onEvtCallback(evt, json[evt]);
-                    }
-                }
-                
-                return this;
-            }
-            _onEvtCallback(evt, callbacks) {
-                if (!_.isString(evt) || _.isUndefined(callbacks)) {
-                    return this;
-                }
-                
-                if (callbacks.constructor !== Array) {
-                    callbacks = [callbacks];
-                }
-                
-                callbacks = callbacks.filter(val => {
-                    return _.isFunction(val);
-                }).map(callbackify);
-                
-                if (!callbacks.length) {
-                    return this;
-                }
-                
-                if (_.isUndefined(this._listeners[evt]) ||
-                    this._listeners[evt].constructor !== Array) {
-                    this._listeners[evt] = [];
-                }
-                
-                this._listeners[evt].push.apply(this._listeners[evt], callbacks);
-                
                 return this;
             }
             /*

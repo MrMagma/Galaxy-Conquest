@@ -31,7 +31,5 @@
 // document.addEventListener("DOMContentLoaded", init);
 })();
 },{"../../Mars/build/MarsEngine.js":2}],2:[function(require,module,exports){
-"use strict";var MarsEngine=(function(){var Engine={Game:require("./MarsGame.js")};module.exports = Engine;return Engine;})();
-},{"./MarsGame.js":3}],3:[function(require,module,exports){
 
 },{}]},{},[1])
