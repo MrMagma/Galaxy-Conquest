@@ -186,19 +186,10 @@ var Graph = (function() {
                     and the data to pass to them when fired as values
              */
             fire() {
-                if (!arguments.length) {
-                    return this;
-                }
-                
-                if (arguments.length === 1 && _.isObject(arguments[0]) &&
-                    arguments[0].constructor !== Array) {
-                    return this._fireJSON.apply(this, arguments);
-                }
-                if (arguments[0].constructor === Array) {
-                    return this._fireEvents.apply(this, arguments);
-                }
-                if (_.isString(arguments[0])) {
-                    return this._fireEvent.apply(this, arguments);
+                if (arguments.length === 1 && _.isObject(arguments[0])) {
+                    this._fireJSON.apply(this, arguments);
+                } else if (arguments.length >= 1) {
+                    this._fireEvent.apply(this, arguments);
                 }
                 
                 return this;
@@ -211,18 +202,23 @@ var Graph = (function() {
                 }
                 return this;
             }
-            _fireEvents(eventNames, data) {
-                for (let eventName of eventNames) {
-                    this._fireEvent(eventName, data);
+            _fireEvent(eventNames, data) {
+                if (!_.isArray(eventNames)) {
+                    eventNames = [eventNames];
                 }
-                return this;
-            }
-            _fireEvent(eventName, data) {
-                if (this._listeners.hasOwnProperty(eventName)) {
-                    for (let listener of this._listeners[eventName]) {
-                        listener(data);
+                
+                eventNames = eventNames.filter(val => {
+                    return (_.isString(val));
+                });
+                
+                for (let evtName of eventNames) {
+                    if (this._listeners.hasOwnProperty(evtName)) {
+                        for (let listener of this._listeners[evtName]) {
+                            listener(data);
+                        }
                     }
                 }
+                
                 return this;
             }
             data() {
