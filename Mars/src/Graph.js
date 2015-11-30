@@ -25,7 +25,74 @@ var Graph = (function() {
                 });
             }
             return callback;
-        };
+        }
+        
+        function getCheckKeys(self, path) {
+            let setKey = `${CHANGE_UID_PREFIX}${path}_set`;
+            let getKey = `${CHANGE_UID_PREFIX}${path}_get`;
+            let verifyKey = `${CHANGE_UID_PREFIX}${path}_verify`;
+            let init = false;
+            
+            if (self._checks[verifyKey] === undefined) {
+                init = true;
+                self._checks[verifyKey] = [];
+            }
+            if (self._checks[getKey] === undefined) {
+                init = true;
+                self._checks[getKey] = [];
+            }
+            if (self._checks[setKey] === undefined) {
+                init = true;
+                self._checks[setKey] = [];
+            }
+            
+            return [getKey, setKey, verifyKey, init];
+        }
+        
+        function attachAccessors(self, path, [getKey, setKey, verifyKey]) {
+            let {ref, key} = _.getPathData(self._data, path);
+            
+            if (ref === undefined) {
+                return this;
+            }
+            
+            let val = ref[key];
+            
+            Object.defineProperty(ref, key, {
+                set(nVal) {
+                    if (self._checks[verifyKey] !== undefined) {
+                        for (let check of self._checks[verifyKey]) {
+                            if (!check(nVal)) {
+                                return;
+                            }
+                        }
+                    }
+                    
+                    if (self._checks[setKey] !== undefined) {
+                        for (let processor of self._checks[setKey]) {
+                            let possible = processor(nVal);
+                            
+                            if (possible !== undefined) {
+                                nVal = possible;
+                            }
+                        }
+                    }
+                    
+                    val = nVal;
+                },
+                get() {
+                    let retVal = val;
+                    
+                    if (self._checks[getKey] !== undefined) {
+                        for (fetcher of self._checks[getKey]) {
+                            retVal = fetchers(val);
+                        }
+                    }
+                    
+                    return retVal;
+                }
+            })
+        }
         
         let _proto = {
             onJSON(json) {
@@ -136,6 +203,17 @@ var Graph = (function() {
                 
                 return this;
             },
+            dataKeyValue(path, value) {
+                if (!_.isString(path)) {
+                    return this;
+                }
+                
+                let {ref, key} = _.getPathData(this._data, path);
+                
+                if (ref !== undefined) {
+                    ref[key] = value;
+                }
+            },
             processJSON(json, path = "") {
                 for (let key in json) {
                     if (json.hasOwnProperty(key)) {
@@ -166,19 +244,61 @@ var Graph = (function() {
                     return _.isFunction(val);
                 });
                 
-                let [getKey, setKey, verifyKey, init] = this._checkKeys(path);
+                let [getKey, setKey, verifyKey, init] = getCheckKeys(this, path);
                 
                 this._checks[setKey].push.apply(this._checks[setKey], listeners);
                 
-                let {ref, key} = _.getPathData(this._data, path);
-                
-                if (ref !== undefined && init) {
-                    this._attachAccessors(ref, key, path, [
+                if (init) {
+                    attachAccessors(this, path, [
                         getKey,
                         setKey,
                         verifyKey
                     ]);
                 }
+            },
+            checkJSON(json, path = "") {
+                for (let key in json) {
+                    if (json.hasOwnProperty(key)) {
+                        let valPath = path;
+                        if (valPath.length) {
+                            valPath += ".";
+                        }
+                        valPath += key;
+                        
+                        if (_.isFunction(json[key]) || _.isArray(json[key])) {
+                            _proto.checkKey.call(this, valPath, json[key]);
+                        } else if (_.isObject(json[key])) {
+                            _proto.checkJSON.call(this, json[key], valPath);
+                        }
+                    }
+                }
+            },
+            checkKey(path, checks) {
+                if (!_.isString(path) || _.isUndefined(checks)) {
+                    return this;
+                }
+                
+                if (!_.isArray(checks)) {
+                    checks = [checks];
+                }
+                
+                checks = checks.filter(val => {
+                    return (_.isFunction(val));
+                });
+                
+                let [getKey, setKey, verifyKey, init] = getCheckKeys(this, path);
+                
+                this._checks[verifyKey].push.apply(this._checks[verifyKey], checks);
+                
+                if (init) {
+                    attachAccessors(this, path, [
+                        getKey,
+                        setKey,
+                        verifyKey
+                    ]);
+                }            
+                
+                return this;
             }
         };
         
@@ -269,20 +389,9 @@ var Graph = (function() {
                 if (arguments.length === 1) {
                     this._data = _.merge(this._data, arguments[0]);
                 } else if (arguments.length >= 2) {
-                    this._dataKeyValue.apply(this, arguments);
+                    _proto.dataKeyValue.apply(this, arguments);
                 }
                 return this._data;
-            }
-            _dataKeyValue(path, value) {
-                if (!_.isString(path)) {
-                    return this;
-                }
-                
-                let {ref, key} = _.getPathData(this._data, path);
-                
-                if (ref !== undefined) {
-                    ref[key] = value;
-                }
             }
             process() {
                 if (arguments.length === 1) {
@@ -297,116 +406,11 @@ var Graph = (function() {
             }
             check() {
                 if (arguments.length === 1) {
-                    this._checkJSON.apply(this, arguments);
+                    _proto.checkJSON.apply(this, arguments);
                 } else if (arguments.length === 2) {
-                    this._checkKey.apply(this, arguments);
+                    _proto.checkKey.apply(this, arguments);
                 }
                 return this;
-            }
-            _checkJSON(json, path = "") {
-                for (let key in json) {
-                    if (json.hasOwnProperty(key)) {
-                        let valPath = path;
-                        if (valPath.length) {
-                            valPath += ".";
-                        }
-                        valPath += key;
-                        
-                        if (_.isFunction(json[key]) || _.isArray(json[key])) {
-                            this._checkKey(valPath, json[key]);
-                        } else if (_.isObject(json[key])) {
-                            this._checkJSON(json[key], valPath);
-                        }
-                    }
-                }
-            }
-            _checkKey(path, checks) {
-                if (!_.isString(path) || _.isUndefined(checks)) {
-                    return this;
-                }
-                
-                if (checks.constructor !== Array) {
-                    checks = [checks];
-                }
-                
-                checks = checks.filter(val => {
-                    return (_.isFunction(val));
-                });
-                
-                let [getKey, setKey, verifyKey, init] = this._checkKeys(path);
-                
-                this._checks[verifyKey].push.apply(this._checks[verifyKey], checks);
-                
-                let {ref, key} = _.getPathData(this._data, path);
-                
-                if (ref !== undefined && init) {
-                    this._attachAccessors(ref, key, path, [
-                        getKey,
-                        setKey,
-                        verifyKey
-                    ]);
-                }            
-                
-                return this;
-            }
-            _checkKeys(path) {
-                let setKey = `${CHANGE_UID_PREFIX}${path}_set`;
-                let getKey = `${CHANGE_UID_PREFIX}${path}_get`;
-                let verifyKey = `${CHANGE_UID_PREFIX}${path}_verify`;
-                let init = false;
-                
-                if (this._checks[verifyKey] === undefined) {
-                    init = true;
-                    this._checks[verifyKey] = [];
-                }
-                if (this._checks[getKey] === undefined) {
-                    init = true;
-                    this._checks[getKey] = [];
-                }
-                if (this._checks[setKey] === undefined) {
-                    init = true;
-                    this._checks[setKey] = [];
-                }
-                
-                return [getKey, setKey, verifyKey, init];
-            }
-            _attachAccessors(ref, key, path, [getKey, setKey, verifyKey]) {
-                let val = ref[key];
-                
-                Object.defineProperty(ref, key, {
-                    set: (function(nVal) {
-                        if (this._checks[verifyKey] !== undefined) {
-                            for (let check of this._checks[verifyKey]) {
-                                if (!check(nVal)) {
-                                    return;
-                                }
-                            }
-                        }
-                        
-                        if (this._checks[setKey] !== undefined) {
-                            for (let processor of this._checks[setKey]) {
-                                let possible = processor(nVal);
-                                
-                                if (possible !== undefined) {
-                                    nVal = possible;
-                                }
-                            }
-                        }
-                        
-                        val = nVal;
-                    }).bind(this),
-                    get: (function() {
-                        let retVal = val;
-                        
-                        if (this._checks[getKey] !== undefined) {
-                            for (fetcher of this._checks[getKey]) {
-                                retVal = fetchers(val);
-                            }
-                        }
-                        
-                        return retVal;
-                    }).bind(this)
-                })
             }
         }
     
