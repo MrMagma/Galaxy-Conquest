@@ -135,6 +135,50 @@ var Graph = (function() {
                 }
                 
                 return this;
+            },
+            processJSON(json, path = "") {
+                for (let key in json) {
+                    if (json.hasOwnProperty(key)) {
+                        let valPath = path;
+                        if (valPath.length) {
+                            valPath += ".";
+                        }
+                        valPath += key;
+                        
+                        if (_.isFunction(json[key]) || _.isArray(json[key])) {
+                            _proto.processKeyValue.call(this, valPath, json[key]);
+                        } else if (_.isObject(json[key])) {
+                            _proto.processJSON.call(this, json[key], valPath);
+                        }
+                    }
+                }
+            },
+            processKeyValue(path, listeners) {
+                if (!_.isString(path)) {
+                    return this;
+                }
+                
+                if (!_.isArray(listeners)) {
+                    listeners = [listeners];
+                }
+                
+                listeners = listeners.filter(val => {
+                    return _.isFunction(val);
+                });
+                
+                let [getKey, setKey, verifyKey, init] = this._checkKeys(path);
+                
+                this._checks[setKey].push.apply(this._checks[setKey], listeners);
+                
+                let {ref, key} = _.getPathData(this._data, path);
+                
+                if (ref !== undefined && init) {
+                    this._attachAccessors(ref, key, path, [
+                        getKey,
+                        setKey,
+                        verifyKey
+                    ]);
+                }
             }
         };
         
@@ -242,55 +286,11 @@ var Graph = (function() {
             }
             process() {
                 if (arguments.length === 1) {
-                    this._processJSON.apply(this, arguments);
+                    _proto.processJSON.apply(this, arguments);
                 } else if (arguments.length === 2) {
-                    this._processKeyValue.apply(this, arguments);
+                    _proto.processKeyValue.apply(this, arguments);
                 }
                 return this;
-            }
-            _processJSON(json, path = "") {
-                for (let key in json) {
-                    if (json.hasOwnProperty(key)) {
-                        let valPath = path;
-                        if (valPath.length) {
-                            valPath += ".";
-                        }
-                        valPath += key;
-                        
-                        if (_.isFunction(json[key]) || _.isArray(json[key])) {
-                            this._processKeyValue(valPath, json[key]);
-                        } else if (_.isObject(json[key])) {
-                            this._processJSON(json[key], valPath);
-                        }
-                    }
-                }
-            }
-            _processKeyValue(path, listeners) {
-                if (!_.isString(path)) {
-                    return this;
-                }
-                
-                if (listeners.constructor !== Array) {
-                    listeners = [listeners];
-                }
-                
-                listeners = listeners.filter(val => {
-                    return _.isFunction(val);
-                });
-                
-                let [getKey, setKey, verifyKey, init] = this._checkKeys(path);
-                
-                this._checks[setKey].push.apply(this._checks[setKey], listeners);
-                
-                let {ref, key} = _.getPathData(this._data, path);
-                
-                if (ref !== undefined && init) {
-                    this._attachAccessors(ref, key, path, [
-                        getKey,
-                        setKey,
-                        verifyKey
-                    ]);
-                }
             }
             fetch() {
                 
