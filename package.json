@@ -29,8 +29,10 @@
     "gulp-babel": "^6.1.0",
     "gulp-browserify": "^0.5.1",
     "gulp-concat": "^2.6.0",
+    "gulp-jshint": "^2.0.0",
     "gulp-spawn-mocha": "^2.2.1",
     "gulp-util": "^3.0.7",
+    "jshint": "^2.8.0",
     "mocha": "^2.3.4"
   },
   "license": "MIT"
