@@ -66,6 +66,48 @@ var Graph = (function() {
                 this._listeners[evt].push.apply(this._listeners[evt], callbacks);
                 
                 return this;
+            },
+            offJSON(json) {
+                if (!_.isObject(json)) {
+                    return this;
+                }
+                
+                for (let evt in json) {
+                    if (json.hasOwnProperty(evt)) {
+                        _proto.offEvtCallback.call(this, evt, json[evt]);
+                    }
+                }
+                
+                return this;
+            },
+            offEvtCallback(evt, callbacks = []) {
+                if (this._listeners[evt] === undefined) {
+                    return this;
+                }
+                
+                if (callbacks.constructor !== Array) {
+                    callbacks = [callbacks];
+                }
+                
+                callbacks = callbacks.filter(val => {
+                    return (_.isFunction(val) && val[CALLBACK_UID_KEY]);
+                });
+                
+                for (let listener of callbacks) {
+                    let uid = listener[CALLBACK_UID_KEY];
+                    
+                    let filtered = this._listeners[evt].filter(val => {
+                        return (val[CALLBACK_UID_KEY] !== uid);
+                    });
+                    
+                    if (!filtered.length) {
+                        delete this._listeners[evt];
+                    } else {
+                        this._listeners[evt] = filtered;
+                    }
+                }
+                
+                return this;
             }
         };
         
@@ -124,53 +166,11 @@ var Graph = (function() {
              */
             off() {
                 if (arguments.length === 1) {
-                    return this._offJSON.apply(this, arguments);
+                    return _proto.offJSON.apply(this, arguments);
                 }
                 if (arguments.length >= 2) {
-                    return this._offEvtCallback.apply(this, arguments);
+                    return _proto.offEvtCallback.apply(this, arguments);
                 }
-                return this;
-            }
-            _offJSON(json) {
-                if (!_.isObject(json)) {
-                    return this;
-                }
-                
-                for (let evt in json) {
-                    if (json.hasOwnProperty(evt)) {
-                        this._offEvtCallback(evt, json[evt]);
-                    }
-                }
-                
-                return this;
-            }
-            _offEvtCallback(evt, callbacks = []) {
-                if (this._listeners[evt] === undefined) {
-                    return this;
-                }
-                
-                if (callbacks.constructor !== Array) {
-                    callbacks = [callbacks];
-                }
-                
-                callbacks = callbacks.filter(val => {
-                    return (_.isFunction(val) && val[CALLBACK_UID_KEY]);
-                });
-                
-                for (let listener of callbacks) {
-                    let uid = listener[CALLBACK_UID_KEY];
-                    
-                    let filtered = this._listeners[evt].filter(val => {
-                        return (val[CALLBACK_UID_KEY] !== uid);
-                    });
-                    
-                    if (!filtered.length) {
-                        delete this._listeners[evt];
-                    } else {
-                        this._listeners[evt] = filtered;
-                    }
-                }
-                
                 return this;
             }
             /*
