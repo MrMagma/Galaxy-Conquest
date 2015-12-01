@@ -1,6 +1,6 @@
 var _ = (function() {
     
-    /* TODO (Joshua): Maybe we should just use underscore or lodash and not
+    /* TODO (Joshua): We should probably just use underscore or lodash and not
        both */
     var lodash = require("lodash");
     var underscore = require("underscore");

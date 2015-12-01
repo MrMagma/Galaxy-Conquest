@@ -17,7 +17,7 @@ var Graph = (function() {
                 if (!callback[CALLBACK_UID_KEY]) {
                     callback[CALLBACK_UID_KEY] = uidGenerator.generate();
                 }
-            } else if(callback.constructor === Array) {
+            } else if (_.isArray(callback)) {
                 callback.map(fn => {
                     if (!fn[CALLBACK_UID_KEY]) {
                         fn[CALLBACK_UID_KEY] = uidGenerator.generate();
@@ -113,7 +113,7 @@ var Graph = (function() {
                     return this;
                 }
                 
-                if (callbacks.constructor !== Array) {
+                if (!_.isArray(callbacks)) {
                     callbacks = [callbacks];
                 }
                 
@@ -125,12 +125,11 @@ var Graph = (function() {
                     return this;
                 }
                 
-                if (_.isUndefined(this._listeners[evt]) ||
-                    this._listeners[evt].constructor !== Array) {
+                if (!_.isArray(this._listeners[evt])) {
                     this._listeners[evt] = [];
                 }
                 
-                this._listeners[evt].push.apply(this._listeners[evt], callbacks);
+                this._listeners[evt] = this._listeners[evt].concat(callbacks);
                 
                 return this;
             },
@@ -152,26 +151,28 @@ var Graph = (function() {
                     return this;
                 }
                 
-                if (callbacks.constructor !== Array) {
+                if (!_.isArray(callbacks)) {
                     callbacks = [callbacks];
                 }
                 
                 callbacks = callbacks.filter(val => {
                     return (_.isFunction(val) && val[CALLBACK_UID_KEY]);
+                }).map(val => {
+                    return val[CALLBACK_UID_KEY];
                 });
                 
-                for (let listener of callbacks) {
-                    let uid = listener[CALLBACK_UID_KEY];
-                    
-                    let filtered = this._listeners[evt].filter(val => {
-                        return (val[CALLBACK_UID_KEY] !== uid);
-                    });
-                    
-                    if (!filtered.length) {
-                        delete this._listeners[evt];
-                    } else {
-                        this._listeners[evt] = filtered;
-                    }
+                if (!callbacks.length) {
+                    return this;
+                }
+                
+                let filtered = this._listeners[evt].filter(val => {
+                    return (callbacks.indexOf(val[CALLBACK_UID_KEY]) === -1)
+                });
+                
+                if (!filtered.length) {
+                    delete this._listeners[evt];
+                } else {
+                    this._listeners[evt] = filtered;
                 }
                 
                 return this;
@@ -192,6 +193,10 @@ var Graph = (function() {
                 eventNames = eventNames.filter(val => {
                     return (_.isString(val));
                 });
+                
+                if (!eventNames.length) {
+                    return this;
+                }
                 
                 for (let evtName of eventNames) {
                     if (this._listeners.hasOwnProperty(evtName)) {
@@ -246,7 +251,7 @@ var Graph = (function() {
                 
                 let [getKey, setKey, verifyKey, init] = getCheckKeys(this, path);
                 
-                this._checks[setKey].push.apply(this._checks[setKey], listeners);
+                this._checks[setKey] = this._checks[setKey].concat(listeners);
                 
                 if (init) {
                     attachAccessors(this, path, [
@@ -288,7 +293,7 @@ var Graph = (function() {
                 
                 let [getKey, setKey, verifyKey, init] = getCheckKeys(this, path);
                 
-                this._checks[verifyKey].push.apply(this._checks[verifyKey], checks);
+                this._checks[verifyKey] = this._checks[verifyKey].concat(checks);
                 
                 if (init) {
                     attachAccessors(this, path, [
