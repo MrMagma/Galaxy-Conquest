@@ -84,8 +84,8 @@ var Graph = (function() {
                     let retVal = val;
                     
                     if (self._checks[getKey] !== undefined) {
-                        for (fetcher of self._checks[getKey]) {
-                            retVal = fetchers(val);
+                        for (let fetcher of self._checks[getKey]) {
+                            retVal = fetcher(val);
                         }
                     }
                     
@@ -252,6 +252,48 @@ var Graph = (function() {
                 let [getKey, setKey, verifyKey, init] = getCheckKeys(this, path);
                 
                 this._checks[setKey] = this._checks[setKey].concat(listeners);
+                
+                if (init) {
+                    attachAccessors(this, path, [
+                        getKey,
+                        setKey,
+                        verifyKey
+                    ]);
+                }
+            },
+            fetchJSON(json, path = "") {
+                for (let key in json) {
+                    if (json.hasOwnProperty(key)) {
+                        let valPath = path;
+                        if (valPath.length) {
+                            valPath += ".";
+                        }
+                        valPath += key;
+                        
+                        if (_.isFunction(json[key]) || _.isArray(json[key])) {
+                            _proto.fetchKeyValue.call(this, valPath, json[key]);
+                        } else if (_.isObject(json[key])) {
+                            _proto.fetchJSON.call(this, json[key], valPath);
+                        }
+                    }
+                }
+            },
+            fetchKeyValue(path, fetchers) {
+                if (!_.isString(path)) {
+                    return this;
+                }
+                
+                if (!_.isArray(fetchers)) {
+                    fetchers = [fetchers];
+                }
+                
+                fetchers = fetchers.filter(val => {
+                    return _.isFunction(val);
+                });
+                
+                let [getKey, setKey, verifyKey, init] = getCheckKeys(this, path);
+                
+                this._checks[getKey] = this._checks[setKey].concat(fetchers);
                 
                 if (init) {
                     attachAccessors(this, path, [
@@ -456,7 +498,12 @@ var Graph = (function() {
                     the fetcher should be attached to
              */
             fetch() {
-                
+                if (arguments.length === 1) {
+                    _proto.fetchJSON.apply(this, arguments);
+                } else if (arguments.length === 2) {
+                    _proto.fetchKeyValue.apply(this, arguments);
+                }
+                return this;
             }
             /*
              Description:

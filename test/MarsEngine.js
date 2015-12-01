@@ -578,6 +578,96 @@ describe("Mars Engine", function() {
                 
             });
             
+            describe("fetch", function() {
+                
+                it("should accept simple keys to attach fetchers", function() {
+                    
+                    var graph = new Graph();
+                    
+                    graph.data({
+                        something: "You will never see me"
+                    });
+                    
+                    graph.fetch("something", function() {
+                        return "Don't even think about it bro";
+                    });
+                    
+                    assert.equal(graph.data("something"), "Don't even think about it bro");
+                    
+                });
+                
+                it("should accept complex keys to attach fetchers", function() {
+                    
+                    var graph = new Graph();
+                    
+                    graph.data({
+                        privateStuff: {
+                            myJournal: "Today I wrote code"
+                        }
+                    });
+                    
+                    graph.fetch("privateStuff.myJournal", function() {
+                        return "It's private!";
+                    });
+                    
+                    assert.equal(graph.data("privateStuff.myJournal"), "It's private!");
+                    
+                });
+                
+                it("should accept JSON structures to attach fetchers", function() {
+                    
+                    var graph = new Graph();
+                    
+                    graph.data({
+                        answer: 42,
+                        question: "What is the answer to life, the universe, and everything?",
+                        awesomeThings: {
+                            coolGame: "PLAY"
+                        },
+                        noAccess: {
+                            secret: "They'll never find out!!!!"
+                        }
+                    });
+                    
+                    graph.fetch({
+                        question: function() {
+                            return "Figure it out";
+                        },
+                        awesomeThings: {
+                            coolGame: function() {
+                                return "Money please";
+                            }
+                        },
+                        noAccess: function() {
+                            return "Nope";
+                        }
+                    });
+                    
+                    assert.equal(graph.data("question"), "Figure it out");
+                    assert.equal(graph.data("awesomeThings.coolGame"), "Money please");
+                    assert.equal(graph.data("noAccess"), "Nope");
+                    assert.equal(graph.data("noAccess.secret"), undefined);
+                    
+                });
+                
+                it("should be able to change values before they are returned", function() {
+                    
+                    var graph = new Graph();
+                    
+                    graph.data({
+                        dirtySentence: "dirt is very dirty"
+                    });
+                    
+                    graph.fetch("dirtySentence", function(v) {
+                        return v.replace(/dirt/gi, "BLEEP");
+                    });
+                    
+                    assert.equal(graph.data("dirtySentence"), "BLEEP is very BLEEPy");
+                    
+                });
+                
+            });
+            
             describe("check", function() {
                 
                 it("should accept simple keys to verify data", function() {
