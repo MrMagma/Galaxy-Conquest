@@ -36,4 +36,61 @@
                 fire(json)
                     `json` is a JSON object containing the names of events as keys
                     and the data to pass to them when fired as values
-             */},{key:"fire",value:function fire(){if(arguments.length === 1 && _.isObject(arguments[0])){_proto.fireJSON.apply(this,arguments);}else if(arguments.length >= 1){_proto.fireEvent.apply(this,arguments);}return this;}},{key:"data",value:function data(){if(arguments.length === 1){this._data = _.merge(this._data,arguments[0]);}else if(arguments.length >= 2){_proto.dataKeyValue.apply(this,arguments);}return this._data;}},{key:"process",value:function process(){if(arguments.length === 1){_proto.processJSON.apply(this,arguments);}else if(arguments.length === 2){_proto.processKeyValue.apply(this,arguments);}return this;}},{key:"fetch",value:function fetch(){}},{key:"check",value:function check(){if(arguments.length === 1){_proto.checkJSON.apply(this,arguments);}else if(arguments.length === 2){_proto.checkKey.apply(this,arguments);}return this;}}]);return GraphObject;})();return GraphObject;})();var Graph=(function(_GraphObject){_inherits(Graph,_GraphObject);function Graph(){var cfg=arguments.length <= 0 || arguments[0] === undefined?{}:arguments[0];_classCallCheck(this,Graph);return _possibleConstructorReturn(this,Object.getPrototypeOf(Graph).call(this,cfg));}return Graph;})(GraphObject);var Node=(function(_GraphObject2){_inherits(Node,_GraphObject2);function Node(){var cfg=arguments.length <= 0 || arguments[0] === undefined?{}:arguments[0];_classCallCheck(this,Node);return _possibleConstructorReturn(this,Object.getPrototypeOf(Node).call(this,cfg));}return Node;})(GraphObject);var Edge=(function(_GraphObject3){_inherits(Edge,_GraphObject3);function Edge(){var cfg=arguments.length <= 0 || arguments[0] === undefined?{}:arguments[0];_classCallCheck(this,Edge);return _possibleConstructorReturn(this,Object.getPrototypeOf(Edge).call(this,cfg));}_createClass(Edge,[{key:"connect",value:function connect(){}},{key:"unconnect",value:function unconnect(){}}]);return Edge;})(GraphObject);Graph.Node = Node;Graph.Edge = Edge;module.exports = Graph;return Graph;})();
+             */},{key:"fire",value:function fire(){if(arguments.length === 1 && _.isObject(arguments[0])){_proto.fireJSON.apply(this,arguments);}else if(arguments.length >= 1){_proto.fireEvent.apply(this,arguments);}return this;} /*
+             Description:
+                Gets and or sets data on the data object, accepting simple
+                key-value pairs, more complex path-value pairs, or a json data
+                structure to merge with the data object
+             Usage:
+                data()
+                    Returns the data object
+                data(path)
+                    Returns the element on the data object at `path`
+                data(path, value)
+                    Sets the data at `path` to value
+                data(json)
+                    Deep merges `json` with the data object
+             */},{key:"data",value:function data(){if(arguments.length === 1){if(_.isObject(arguments[0])){this._data = _.merge(this._data,arguments[0]);}else if(_.isString(arguments[0])){return _.getPathValue(this._data,arguments[0]);}}else if(arguments.length >= 2){_proto.dataKeyValue.apply(this,arguments);}return this._data;} /*
+             Description:
+                Allows code to be written to process requests to set data on
+                this object
+             Usage:
+                process(path, processor)
+                    Attaches the `processor` method to any `set` events on
+                    the data found at `path` on the data object
+                process(json)
+                    Takes an object consisting of processors and objects in
+                    which the path to a processor (i.e. something.somethingElse)
+                    represents the path to the value on the data objec that
+                    the processor should be attached to
+             */},{key:"process",value:function process(){if(arguments.length === 1){_proto.processJSON.apply(this,arguments);}else if(arguments.length === 2){_proto.processKeyValue.apply(this,arguments);}return this;} /*
+             Description:
+                Allows code to be written which is triggered upon an attempt
+                to get a value on the data object and can modify that data
+                before it is passed out.
+             Usage:
+                fetch(path, fetcher)
+                    Attaches `fetcher` (or all functions contained within it if
+                    it's an array) to requests for the value at `path` on the
+                    data object
+                fetch(json)
+                    Takes an object consisting of fetchers and objects in
+                    which the path to a fetcher (i.e. something.somethingElse)
+                    represents the path to the value on the data object that
+                    the fetcher should be attached to
+             */},{key:"fetch",value:function fetch(){} /*
+             Description:
+                Allows code to be written which checks if a value is valid for
+                some element on the data object before it is set and blocks
+                the set attempt if it is not valid.
+             Usage:
+                check(path, checks)
+                    Adds the functions in checks (or just `checks` if it's a
+                    function) as pre-set checks for the element on `path` in the
+                    data object.
+                check(json)
+                    Takes an object consisting of checks and objects in
+                    which the path to a check (i.e. something.somethingElse)
+                    represents the path to the value on the data object that
+                    the check should be attached to
+             */},{key:"check",value:function check(){if(arguments.length === 1){_proto.checkJSON.apply(this,arguments);}else if(arguments.length === 2){_proto.checkKey.apply(this,arguments);}return this;}}]);return GraphObject;})();return GraphObject;})();var Graph=(function(_GraphObject){_inherits(Graph,_GraphObject);function Graph(){var cfg=arguments.length <= 0 || arguments[0] === undefined?{}:arguments[0];_classCallCheck(this,Graph);return _possibleConstructorReturn(this,Object.getPrototypeOf(Graph).call(this,cfg));}return Graph;})(GraphObject);var Node=(function(_GraphObject2){_inherits(Node,_GraphObject2);function Node(){var cfg=arguments.length <= 0 || arguments[0] === undefined?{}:arguments[0];_classCallCheck(this,Node);return _possibleConstructorReturn(this,Object.getPrototypeOf(Node).call(this,cfg));}return Node;})(GraphObject);var Edge=(function(_GraphObject3){_inherits(Edge,_GraphObject3);function Edge(){var cfg=arguments.length <= 0 || arguments[0] === undefined?{}:arguments[0];_classCallCheck(this,Edge);return _possibleConstructorReturn(this,Object.getPrototypeOf(Edge).call(this,cfg));}_createClass(Edge,[{key:"connect",value:function connect(){}},{key:"unconnect",value:function unconnect(){}}]);return Edge;})(GraphObject);Graph.Node = Node;Graph.Edge = Edge;module.exports = Graph;return Graph;})();

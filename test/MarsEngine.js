@@ -435,6 +435,40 @@ describe("Mars Engine", function() {
                     
                 });
                 
+                it("should return the data object by default", function() {
+                    
+                    var graph = new Graph();
+                    
+                    var dat = {
+                        a: 2,
+                        b: 3,
+                        c: 4
+                    };
+                    
+                    var dat2 = graph.data(dat);
+                    
+                    for (var key in dat) {
+                        if (dat.hasOwnProperty(key)) {
+                            assert.equal(dat2[key], dat[key]);
+                        }
+                    }
+                    
+                });
+                
+                it("should get data at a path", function() {
+                    
+                    var graph = new Graph();
+                    
+                    graph.data({
+                        test: {
+                            reward: "42 coins"
+                        }
+                    });
+                    
+                    assert.equal(graph.data("test.reward"), "42 coins");
+                    
+                });
+                
             });
             
             describe("process", function() {

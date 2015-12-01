@@ -390,14 +390,47 @@ var Graph = (function() {
                 
                 return this;
             }
+            /*
+             Description:
+                Gets and or sets data on the data object, accepting simple
+                key-value pairs, more complex path-value pairs, or a json data
+                structure to merge with the data object
+             Usage:
+                data()
+                    Returns the data object
+                data(path)
+                    Returns the element on the data object at `path`
+                data(path, value)
+                    Sets the data at `path` to value
+                data(json)
+                    Deep merges `json` with the data object
+             */
             data() {
                 if (arguments.length === 1) {
-                    this._data = _.merge(this._data, arguments[0]);
+                    if (_.isObject(arguments[0])) {
+                        this._data = _.merge(this._data, arguments[0]);
+                    } else if (_.isString(arguments[0])) {
+                        return _.getPathValue(this._data, arguments[0]);
+                    }
                 } else if (arguments.length >= 2) {
                     _proto.dataKeyValue.apply(this, arguments);
                 }
                 return this._data;
             }
+            /*
+             Description:
+                Allows code to be written to process requests to set data on
+                this object
+             Usage:
+                process(path, processor)
+                    Attaches the `processor` method to any `set` events on
+                    the data found at `path` on the data object
+                process(json)
+                    Takes an object consisting of processors and objects in
+                    which the path to a processor (i.e. something.somethingElse)
+                    represents the path to the value on the data objec that
+                    the processor should be attached to
+             */
             process() {
                 if (arguments.length === 1) {
                     _proto.processJSON.apply(this, arguments);
@@ -406,9 +439,41 @@ var Graph = (function() {
                 }
                 return this;
             }
+            /*
+             Description:
+                Allows code to be written which is triggered upon an attempt
+                to get a value on the data object and can modify that data
+                before it is passed out.
+             Usage:
+                fetch(path, fetcher)
+                    Attaches `fetcher` (or all functions contained within it if
+                    it's an array) to requests for the value at `path` on the
+                    data object
+                fetch(json)
+                    Takes an object consisting of fetchers and objects in
+                    which the path to a fetcher (i.e. something.somethingElse)
+                    represents the path to the value on the data object that
+                    the fetcher should be attached to
+             */
             fetch() {
                 
             }
+            /*
+             Description:
+                Allows code to be written which checks if a value is valid for
+                some element on the data object before it is set and blocks
+                the set attempt if it is not valid.
+             Usage:
+                check(path, checks)
+                    Adds the functions in checks (or just `checks` if it's a
+                    function) as pre-set checks for the element on `path` in the
+                    data object.
+                check(json)
+                    Takes an object consisting of checks and objects in
+                    which the path to a check (i.e. something.somethingElse)
+                    represents the path to the value on the data object that
+                    the check should be attached to
+             */
             check() {
                 if (arguments.length === 1) {
                     _proto.checkJSON.apply(this, arguments);
