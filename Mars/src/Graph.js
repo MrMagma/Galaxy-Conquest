@@ -53,7 +53,7 @@ var Graph = (function() {
             let {ref, key} = _.getPathData(self._data, path);
             
             if (ref === undefined) {
-                return this;
+                return self;
             }
             
             let val = ref[key];
@@ -219,22 +219,13 @@ var Graph = (function() {
                     ref[key] = value;
                 }
             },
-            processJSON(json, path = "") {
-                for (let key in json) {
-                    if (json.hasOwnProperty(key)) {
-                        let valPath = path;
-                        if (valPath.length) {
-                            valPath += ".";
-                        }
-                        valPath += key;
-                        
-                        if (_.isFunction(json[key]) || _.isArray(json[key])) {
-                            _proto.processKeyValue.call(this, valPath, json[key]);
-                        } else if (_.isObject(json[key])) {
-                            _proto.processJSON.call(this, json[key], valPath);
-                        }
+            processJSON(json) {
+                _.walkJSON(json, (val, path) => {
+                    if (_.isFunction(val) || _.isArray(val)) {
+                        _proto.processKeyValue.call(this, path, val);
+                        return true;
                     }
-                }
+                })
             },
             processKeyValue(path, listeners) {
                 if (!_.isString(path)) {
@@ -262,21 +253,12 @@ var Graph = (function() {
                 }
             },
             fetchJSON(json, path = "") {
-                for (let key in json) {
-                    if (json.hasOwnProperty(key)) {
-                        let valPath = path;
-                        if (valPath.length) {
-                            valPath += ".";
-                        }
-                        valPath += key;
-                        
-                        if (_.isFunction(json[key]) || _.isArray(json[key])) {
-                            _proto.fetchKeyValue.call(this, valPath, json[key]);
-                        } else if (_.isObject(json[key])) {
-                            _proto.fetchJSON.call(this, json[key], valPath);
-                        }
+                _.walkJSON(json, (val, path) => {
+                    if (_.isFunction(val) || _.isArray(val)) {
+                        _proto.fetchKeyValue.call(this, path, val);
+                        return true;
                     }
-                }
+                })
             },
             fetchKeyValue(path, fetchers) {
                 if (!_.isString(path)) {
@@ -304,21 +286,12 @@ var Graph = (function() {
                 }
             },
             checkJSON(json, path = "") {
-                for (let key in json) {
-                    if (json.hasOwnProperty(key)) {
-                        let valPath = path;
-                        if (valPath.length) {
-                            valPath += ".";
-                        }
-                        valPath += key;
-                        
-                        if (_.isFunction(json[key]) || _.isArray(json[key])) {
-                            _proto.checkKey.call(this, valPath, json[key]);
-                        } else if (_.isObject(json[key])) {
-                            _proto.checkJSON.call(this, json[key], valPath);
-                        }
+                _.walkJSON(json, (val, path) => {
+                    if (_.isFunction(val) || _.isArray(val)) {
+                        _proto.checkKey.call(this, path, val);
+                        return true;
                     }
-                }
+                });
             },
             checkKey(path, checks) {
                 if (!_.isString(path) || _.isUndefined(checks)) {

@@ -31,6 +31,22 @@ var _ = (function() {
         },
         getPathTail(path = "") {
             return path.split(".").pop();
+        },
+        walkJSON(json, walker, path = "") {
+            for (let key in json) {
+                if (json.hasOwnProperty(key)) {
+                    let valPath = path;
+                    if (valPath.length) {
+                        valPath += ".";
+                    }
+                    valPath += key;
+                    
+                    let dontWalk = walker(json[key], valPath);
+                    if (!dontWalk) {
+                        _.walkJSON(json[key], walker, valPath);
+                    }
+                }
+            }
         }
     });
     
