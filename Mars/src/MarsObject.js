@@ -102,7 +102,7 @@ var MarsObject = (function() {
                 
                 return retVal;
             }
-        })
+        });
     }
     
     /*
@@ -544,7 +544,7 @@ var MarsObject = (function() {
         process() {
             if (arguments.length === 1) {
                 _proto.processJSON.apply(this, arguments);
-            } else if (arguments.length === 2) {
+            } else if (arguments.length >= 2) {
                 _proto.processKeyValue.apply(this, arguments);
             }
             return this;
@@ -568,7 +568,7 @@ var MarsObject = (function() {
         fetch() {
             if (arguments.length === 1) {
                 _proto.fetchJSON.apply(this, arguments);
-            } else if (arguments.length === 2) {
+            } else if (arguments.length >= 2) {
                 _proto.fetchKeyValue.apply(this, arguments);
             }
             return this;
@@ -592,7 +592,7 @@ var MarsObject = (function() {
         check() {
             if (arguments.length === 1) {
                 _proto.checkJSON.apply(this, arguments);
-            } else if (arguments.length === 2) {
+            } else if (arguments.length >= 2) {
                 _proto.checkKey.apply(this, arguments);
             }
             return this;
