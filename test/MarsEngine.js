@@ -103,7 +103,7 @@ describe("Mars Engine", function() {
                     node2.connect([42, edge]);
                     
                     assert.equal(node2.connections.length, 1);
-                    assert.equal(_.isEqual(node2.connection[0]), true);
+                    assert.equal(_.isEqual(node2.connections[0], edge), true);
                     
                 });
                 

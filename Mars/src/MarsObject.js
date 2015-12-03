@@ -422,6 +422,7 @@ var MarsObject = (function() {
             this._listeners = {};
             this._data = {};
             this._checks = {};
+            this._uid = uidGenerator.generate();
             
             for (let evt in listen) {
                 if (listen.hasOwnProperty(evt)) {
