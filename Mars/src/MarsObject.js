@@ -10,6 +10,10 @@ var MarsObject = (function() {
         sequenceLength: 30
     });
     
+    /*
+     Adds a callback UID property to a function or all elements of an array so
+     we can keep track of our callbacks and do cool stuff with them
+     */
     function callbackify(callback) {
         if (_.isFunction(callback)) {
             if (!callback[CALLBACK_UID_KEY]) {
@@ -25,6 +29,10 @@ var MarsObject = (function() {
         return callback;
     }
     
+    /*
+     Gets the keys for the different check (set, get, verify) events for a
+     specific path.
+     */
     function getCheckKeys(self, path) {
         let setKey = `${CHANGE_UID_PREFIX}${path}_set`;
         let getKey = `${CHANGE_UID_PREFIX}${path}_get`;
@@ -47,6 +55,11 @@ var MarsObject = (function() {
         return [getKey, setKey, verifyKey, init];
     }
     
+    /*
+     Attaches getter and setter methods to a property on an object so we can
+     fire events and mess with things when someone tries to do something with
+     it.
+     */
     function attachAccessors(self, path, [getKey, setKey, verifyKey]) {
         let {ref, key} = _.getPathData(self._data, path);
         
@@ -92,7 +105,17 @@ var MarsObject = (function() {
         })
     }
     
+    /*
+     `_proto` is an object containing methods that we would like to use in
+     MarsObject but don't necessarily want being exposed to the whole world
+     and cluttering things up */
     let _proto = {
+        /*
+         Used by the `on` method when only one argument is given.
+         Checks if the argument it's been given is JSON and if so it loops over
+         every property and calls the `onEvtCallback` method with the key as
+         the event name and the value as the listener(s)
+         */
         onJSON(json) {
             if (!_.isObject(json)) {
                 return this;
@@ -106,6 +129,11 @@ var MarsObject = (function() {
             
             return this;
         },
+        /*
+         Used by the `on` method when two arguments are supplied and the
+         `onJSON` method to add a listener or group of listeners for an
+         event.
+         */
         onEvtCallback(evt, callbacks) {
             if (!_.isString(evt) || _.isUndefined(callbacks)) {
                 return this;
@@ -131,6 +159,11 @@ var MarsObject = (function() {
             
             return this;
         },
+        /*
+         Used by the `off` method when one argument is supplied.
+         Behaves the same way as `onJSON` except it calls
+         `offEvtCallback`
+         */
         offJSON(json) {
             if (!_.isObject(json)) {
                 return this;
@@ -144,6 +177,13 @@ var MarsObject = (function() {
             
             return this;
         },
+        /*
+         Used by the `off` method when 2 arguments are supplied and the `offJSON`
+         method.
+         Takes an event name and a callback or group of callbacks and loops over
+         the callbacks unbinding all listeners on the specified event that have
+         the same UID
+         */
         offEvtCallback(evt, callbacks = []) {
             if (this._listeners[evt] === undefined) {
                 return this;
@@ -175,6 +215,12 @@ var MarsObject = (function() {
             
             return this;
         },
+        /*
+         Used by the `fire` method when one argument is supplied.
+         Takes in a JSON object and loops over all keys contained and passes
+         them to the `fireEvent` method as event names along with values as
+         event data.
+         */
         fireJSON(json) {
             for (let eventName in json) {
                 if (json.hasOwnProperty(eventName)) {
@@ -183,6 +229,12 @@ var MarsObject = (function() {
             }
             return this;
         },
+        /*
+         Used by the `fire` method when one argument is supplied and the
+         `fireJSON` method.
+         Takes in one or more event names and some data and calls every event,
+         passing in the data to the listeners
+         */
         fireEvent(eventNames, data) {
             if (!_.isArray(eventNames)) {
                 eventNames = [eventNames];
@@ -206,6 +258,11 @@ var MarsObject = (function() {
             
             return this;
         },
+        /*
+         Used by the `data` method when 2 or more arguments are given.
+         Takes in a string representing the path to a value on the data object
+         and a value to set it to and sets the element at the path.
+         */
         dataKeyValue(path, value) {
             if (!_.isString(path)) {
                 return this;
@@ -217,6 +274,12 @@ var MarsObject = (function() {
                 ref[key] = value;
             }
         },
+        /*
+         Called by the `process` method when one argument is supplied.
+         Takes in a JSON object representing the structure of the data object
+         with values representing processors and calls `processKeyValue` for
+         them. Works recursively.
+         */
         processJSON(json) {
             _.walkJSON(json, (val, path) => {
                 if (_.isFunction(val) || _.isArray(val)) {
@@ -225,6 +288,13 @@ var MarsObject = (function() {
                 }
             })
         },
+        /*
+         Used by the `process` method when two or more arguments are supplied
+         and the `processJSON` method.
+         Takes in a string representing the path to a value on the data object
+         and the processor(s) to attach to it and, if the path is defined,
+         attaches them.
+         */
         processKeyValue(path, listeners) {
             if (!_.isString(path)) {
                 return this;
@@ -250,6 +320,12 @@ var MarsObject = (function() {
                 ]);
             }
         },
+        /*
+         Called by the `fetch` method when one argument is supplied.
+         Takes in a JSON object representing the structure of the data object
+         with values representing fetchers and calls `fetchKeyValue` for
+         them. Works recursively.
+         */
         fetchJSON(json, path = "") {
             _.walkJSON(json, (val, path) => {
                 if (_.isFunction(val) || _.isArray(val)) {
@@ -258,6 +334,13 @@ var MarsObject = (function() {
                 }
             })
         },
+        /*
+         Used by the `fetch` method when two or more arguments are supplied and
+         the `fetchJSON` method.
+         Takes in a string representing the path to a value on the data object
+         and the fetcher(s) to attach to it and, if the path is defined,
+         attaches them.
+         */
         fetchKeyValue(path, fetchers) {
             if (!_.isString(path)) {
                 return this;
@@ -283,6 +366,12 @@ var MarsObject = (function() {
                 ]);
             }
         },
+        /*
+         Called by the `check` method when one argument is supplied.
+         Takes in a JSON object representing the structure of the data object
+         with values representing fetchers and calls `checkKeyValue` for
+         them. Works recursively.
+         */
         checkJSON(json, path = "") {
             _.walkJSON(json, (val, path) => {
                 if (_.isFunction(val) || _.isArray(val)) {
@@ -291,6 +380,13 @@ var MarsObject = (function() {
                 }
             });
         },
+        /*
+         Used by the `check` method when two or more arguments are supplied and
+         the `checkJSON` method.
+         Takes in a string representing the path to a value on the data object
+         and the checker(s) to attach to it and, if the path is defined,
+         attaches them.
+         */
         checkKey(path, checks) {
             if (!_.isString(path) || _.isUndefined(checks)) {
                 return this;
