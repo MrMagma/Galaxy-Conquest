@@ -56,6 +56,23 @@ describe("Mars Engine", function() {
                     
                 });
                 
+                it("should be able to connect to multiple Edges", function() {
+                    
+                    var node = new Node();
+                    
+                    var edge1 = new Edge();
+                    
+                    var edge2 = new Edge();
+                    
+                    node.connect(edge1);
+                    node.connect(edge2);
+                    
+                    assert.equal(node.connections.length, 2);
+                    assert.equal(_.isEqual(node.connections[0], edge1), true);
+                    assert.equal(_.isEqual(node.connections[1], edge2), true);
+                    
+                })
+                
                 it("should accept multiple arguments", function() {
                     
                     var node = new Node();
@@ -184,27 +201,163 @@ describe("Mars Engine", function() {
                 
             });
             
-            it("should be able to connect to Nodes", function() {
+            it("should have a connect method", function() {
                 
+                var edge = new Edge();
                 
-                
-            });
-            
-            it("should be able to connect to multiple Nodes", function() {
-                
-                
+                assert.notEqual(edge.connect, undefined);
                 
             });
             
-            it("should be able to disconnect from Nodes", function() {
+            describe("the connect method", function() {
+            
+                it("should be able to connect to Nodes", function() {
+                    
+                    var edge = new Edge();
+                    
+                    var node = new Node();
+                    
+                    edge.connect(node);
+                    
+                    assert.notEqual(edge.connections, undefined);
+                    assert.equal(_.isArray(edge.connections), true);
+                    assert.equal(edge.connections.length, 1);
+                    assert.equal(_.isEqual(edge.connections[0], node), true);
+                    
+                });
                 
+                it("should be able to connect to multiple Nodes", function() {
+                    
+                    var edge = new Edge();
+                    
+                    var node1 = new Node();
+                    
+                    var node2 = new Node();
+                    
+                    edge.connect(node1);
+                    edge.connect(node2);
+                    
+                    assert.equal(edge.connections.length, 2);
+                    assert.equal(_.isEqual(edge.connections[0], node1), true);
+                    assert.equal(_.isEqual(edge.connections[1], node2), true);
+                    
+                })
                 
+                it("should accept multiple arguments", function() {
+                    
+                    var edge = new Edge();
+                    
+                    var node1 = new Node();
+                    
+                    var node2 = new Node();
+                    
+                    edge.connect(node1, node2);
+                    
+                    assert.equal(edge.connections.length, 2);
+                    assert.equal(_.isEqual(edge.connections[0], node1), true);
+                    assert.equal(_.isEqual(edge.connections[1], node2), true);
+                    
+                });
+                
+                it("should accept an array of Nodes", function() {
+                    
+                    var edge = new Edge();
+                    
+                    var node1 = new Node();
+                    
+                    var node2 = new Node();
+                    
+                    edge.connect([node1, node2]);
+                    
+                    assert.equal(edge.connections.length, 2);
+                    assert.equal(_.isEqual(edge.connections[0], node1), true);
+                    assert.equal(_.isEqual(edge.connections[1], node2), true);
+                    
+                });
+                
+                it("should only accept Nodes", function() {
+                    
+                    var edge1 = new Edge();
+                    
+                    edge1.connect(2);
+                    
+                    assert.equal(edge1.connections.length, 0);
+                    
+                    var edge2 = new Edge();
+                    
+                    var node = new Node();
+                    
+                    edge2.connect([42, node]);
+                    
+                    assert.equal(edge2.connections.length, 1);
+                    assert.equal(_.isEqual(edge2.connections[0], node), true);
+                    
+                });
                 
             });
             
-            it("should be able to disconnect from multiple Nodes", function() {
+            it("should have a disconnect method", function() {
                 
+                var node = new Edge();
                 
+                assert.notEqual(node.disconnect, undefined);
+                assert.equal(_.isFunction(node.disconnect), true);
+                
+            });
+            
+            describe("the disconnect method", function() {
+                
+                it("should be able to disconnect from Nodes", function() {
+                    
+                    var edge = new Edge();
+                    
+                    var node1 = new Node();
+                    var node2 = new Node();
+                    
+                    edge.connect(node1, node2);
+                    
+                    edge.disconnect(node1);
+                    
+                    assert.equal(edge.connections.length, 1);
+                    assert.equal(_.isEqual(edge.connections[0], node2), true);
+                    
+                });
+                
+                it("should accept multiple arguments", function() {
+                    
+                    var edge = new Edge();
+                    
+                    var node1 = new Node();
+                    var node2 = new Node();
+                    var node3 = new Node();
+                    var node4 = new Node();
+                    
+                    edge.connect(node1, node2, node3, node4);
+                    
+                    edge.disconnect(node1, node3);
+                    
+                    assert.equal(edge.connections.length, 2);
+                    assert.equal(_.union(edge.connections, [node2, node4]).length, 2);
+                    
+                });
+                
+                it("should accept an array of edges", function() {
+                    
+                    var edge = new Edge();
+                    
+                    var node1 = new Node();
+                    var node2 = new Node();
+                    var node3 = new Node();
+                    var node4 = new Node();
+                    
+                    edge.connect(node1, node2, node3, node4);
+                    
+                    edge.disconnect([node1, node3]);
+                    
+                    assert.equal(edge.connections.length, 2);
+                    assert.equal(_.union(edge.connections, [node2, node4]).length, 2);
+                    
+                });
                 
             });
             

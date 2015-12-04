@@ -3,5 +3,5 @@
 },{"../../Mars/build/MarsEngine.js":2}],2:[function(require,module,exports){
 "use strict";var MarsEngine=(function(){var Engine={Game:require("./MarsGame.js")};module.exports = Engine;return Engine;})();
 },{"./MarsGame.js":3}],3:[function(require,module,exports){
-
+"use strict";function _typeof(obj){return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol?"symbol":typeof obj;}var MarsGame=(function(){function Mars(){var cfg=arguments.length <= 0 || arguments[0] === undefined?{}:arguments[0];this._fps = 30;this._frameInterval = 1000 / this._fps;}Mars.prototype = {FPS:function FPS(value){var type=typeof value === "undefined"?"undefined":_typeof(value);if(type === "number" || type === "string"){if(typeof value === "string"){value = parseInt(value);if(isNaN(value)){console.error("Please supply a valid value to the \"FPS\" method");return;}}this._fps = value;this._frameInterval = 1000 / this._fps;}return this._fps;},init:function init(){},load:function load(){},progress:function progress(){},update:function update(){},preload:function preload(){},load:function load(){}};module.exports = Mars;return Mars;})();
 },{}]},{},[1])
