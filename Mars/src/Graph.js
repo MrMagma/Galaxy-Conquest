@@ -14,6 +14,10 @@ var Graph = (function() {
     var [Node, Edge] = (function() {
         
         let _proto = {
+            /*
+             Connects a Node to one or more Edges. Used by the `connect` method
+             on Node.
+             */
             connectToEdges(edges) {
                 for (let edge of edges) {
                     if (edge instanceof Graph.Edge && !this.connected(edge)) {
@@ -22,16 +26,10 @@ var Graph = (function() {
                     }
                 }
             },
-            // disconnectFromEdges(disconnect = []) {
-            //     disconnect = disconnect.map(edge => edge._uid);
-            //     this.connections = this.connections.filter(edge => {
-            //         if (disconnect.indexOf(edge._uid) !== -1) {
-            //             edge.disconnect(this);
-            //             return false;
-            //         }
-            //         return true;
-            //     });
-            // },
+            /*
+             Connects an Edge to one or more Nodes. Used by the `connect`
+             method on Edge.
+             */
             connectToNodes(nodes) {
                 for (let node of nodes) {
                     if (node instanceof Graph.Node && !this.connected(node)) {
@@ -40,21 +38,19 @@ var Graph = (function() {
                     }
                 }
             },
-            // disconnectFromNodes(disconnect) {
-            //     disconnect = disconnect.map(node => node._uid);
-            //     this.connections = this.connections.filter(node => {
-            //         if (disconnect.indexOf(node._uid) !== -1) {
-            //             node.disconnect(this);
-            //             return false;
-            //         }
-            //         return true;
-            //     });
-            // }
+            /*
+             Used to disconnect a graph object from one or more others. Used by
+             the `disconnect` methods on Node and Edge
+             */
             disconnectMultiple(o1, disconnect) {
                 for (let o2 of disconnect) {
                     _proto.disconnectFrom(o1, o2);
                 }
             },
+            /*
+             Used to diconnect two graph objects from one another. Used by
+             `disconnectMultiple`.
+             */
             disconnectFrom(o1, o2) {
                 if (!_.isObject(o1) || !_.isObject(o2)) {
                     return;
@@ -73,6 +69,15 @@ var Graph = (function() {
                 super(cfg);
                 this.connections = [];
             }
+            /*
+             Description:
+                Connects this Node to one or more Edges.
+             Usage:
+                connect(edges)
+                    Connects this Node to all Edges in an array.
+                connect(edge1[, edge2, ...edgeN])
+                    Connects this Node to all Edges supplied as arguments.
+             */
             connect() {
                 if (arguments.length === 1 && _.isArray(arguments[0])) {
                     _proto.connectToEdges.call(this, arguments[0]);
@@ -82,6 +87,15 @@ var Graph = (function() {
                 
                 return this;
             }
+            /*
+             Description:
+                Disconnects this Node from one or more Edges.
+             Usage:
+                disconnect(edges)
+                    Disconnects this Node from all Edges in an array.
+                disconnect(edge1[, edge2, ...edgeN])
+                    Disconnects this Node from all Edges supplied as arguments.
+             */
             disconnect() {
                 if (arguments.length === 1 && _.isArray(arguments[0])) {
                     _proto.disconnectMultiple(this, arguments[0]);
@@ -91,6 +105,15 @@ var Graph = (function() {
                 
                 return this;
             }
+            /*
+             Description:
+                Checks to see if this Node is connected to a specific Edge, and
+                if so returns true, otherwise it returns false.
+             Usage:
+                connected(edge)
+                    Checks to see if this Node is connected to the `edge`.
+                    `edge` must be an instance of Graph.Edge.
+             */
             connected(testEdge) {
                 if (!(testEdge instanceof Graph.Edge)) {
                     return false;
@@ -105,6 +128,15 @@ var Graph = (function() {
                 super(cfg);
                 this.connections = [];
             }
+            /*
+             Description:
+                Connects this Edge to one or more Nodes.
+             Usage:
+                connect(nodes)
+                    Connects this Edge to all Nodes in an array.
+                connect(node1[, node2, ...nodeN])
+                    Connects this Edge to all Nodes supplied as arguments.
+             */
             connect() {
                 if (arguments.length === 1 && _.isArray(arguments[0])) {
                     _proto.connectToNodes.call(this, arguments[0]);
@@ -114,6 +146,15 @@ var Graph = (function() {
                 
                 return this;
             }
+            /*
+             Description:
+                Disconnects this Edge from one or more Nodes.
+             Usage:
+                disconnect(nodes)
+                    Disconnects this Edge from all Nodes in an array.
+                disconnect(node1[, node2, ...nodeN])
+                    Disconnects this Edge from all Nodes supplied as arguments.
+             */
             disconnect() {
                 if (arguments.length === 1 && _.isArray(arguments[0])) {
                     _proto.disconnectMultiple(this, arguments[0]);
@@ -123,6 +164,15 @@ var Graph = (function() {
                 
                 return this;
             }
+            /*
+             Description:
+                Checks to see if this Node is connected to a specific Edge, and
+                if so returns true, otherwise it returns false.
+             Usage:
+                connected(node)
+                    Checks to see if this Edge is connected to the `node`.
+                    `node` must be an instance of Graph.Node.
+             */
             connected(testNode) {
                 if (!(testNode instanceof Graph.Node)) {
                     return false;

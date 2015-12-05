@@ -191,6 +191,33 @@ describe("Mars Engine", function() {
                 
             });
             
+            it("should have a connected method", function() {
+                
+                var node = new Node();
+                
+                assert.notEqual(node.connected, undefined);
+                assert.equal(_.isFunction(node.connected), true);
+                
+            });
+            
+            describe("the connected method", function() {
+                
+                it("should return whether or not a Node is connected to a specific Edge", function() {
+                    
+                    var node = new Node();
+                    
+                    var edge1 = new Edge();
+                    var edge2 = new Edge();
+                    
+                    node.connect(edge1);
+                    
+                    assert.equal(node.connected(edge1), true);
+                    assert.equal(node.connected(edge2), false);
+                    
+                });
+                
+            });
+            
         });
         
         describe("Edge", function() {
@@ -356,6 +383,33 @@ describe("Mars Engine", function() {
                     
                     assert.equal(edge.connections.length, 2);
                     assert.equal(_.union(edge.connections, [node2, node4]).length, 2);
+                    
+                });
+                
+                it("should have a connected method", function() {
+                    
+                    var edge = new Edge();
+                    
+                    assert.notEqual(edge.connected, undefined);
+                    assert.equal(_.isFunction(edge.connected), true);
+                    
+                });
+                
+                describe("the connected method", function() {
+                    
+                    it("should return whether or not a Node is connected to a specific Edge", function() {
+                        
+                        var edge = new Edge();
+                        
+                        var node1 = new Node();
+                        var node2 = new Node();
+                        
+                        edge.connect(node1);
+                        
+                        assert.equal(edge.connected(node1), true);
+                        assert.equal(edge.connected(node2), false);
+                        
+                    });
                     
                 });
                 
