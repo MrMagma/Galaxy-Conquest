@@ -5,7 +5,15 @@ var Graph = (function() {
     
     var Graph = (function() {
         
+        /*
+         A private "prototype" for Graphs containing methods which we would
+         like to add but don't want the public messing with.
+         */
         let _proto = {
+            /*
+             Used by the `add` method to add Nodes and or Edges to a Graph
+             object.
+             */
             add(objs) {
                 for (let obj of objs) {
                     if (obj instanceof Graph.Node) {
@@ -15,6 +23,10 @@ var Graph = (function() {
                     }
                 }
             },
+            /*
+             Used by the `remove` method to remove Nodes and or Edges from a
+             Graph
+             */
             remove(objs) {
                 let nodeUids = [];
                 let edgeUids = [];
@@ -40,6 +52,16 @@ var Graph = (function() {
                 this.nodes = [];
                 this.edges = [];
             }
+            /*
+             Description:
+                Adds one or more Nodes and or Edges to this Graph
+             Usage:
+                add(objects)
+                    Adds all Nodes and Edges in `objects` to this Graph
+                add(object1[, object2, ...objectN])
+                    Adds all arguments which are either Nodes or Edges to this
+                    Graph
+             */
             add() {
                 if (arguments.length === 1 && _.isArray(arguments[0])) {
                     _proto.add.call(this, arguments[0]);
@@ -49,6 +71,16 @@ var Graph = (function() {
                 
                 return this;
             }
+            /*
+             Description:
+                Removes one or more Nodes and or Edges from this Graph
+             Usage
+                remove(objects)
+                    Removes all Nodes and Edges in `objects` from this Graph
+                remove(object1[, object2, ...objectN])
+                    Removes all arguments which are either Nodes or Edges from
+                    this Graph
+             */
             remove() {
                 if (arguments.length === 1 && _.isArray(arguments[0])) {
                     _proto.remove.call(this, arguments[0]);
@@ -66,6 +98,10 @@ var Graph = (function() {
     
     var [Node, Edge] = (function() {
         
+        /*
+         A private "prototype" for Nodes and Edges containing methods that we
+         need and the peasant rabble doesn't.
+         */
         let _proto = {
             /*
              Connects a Node to one or more Edges. Used by the `connect` method
