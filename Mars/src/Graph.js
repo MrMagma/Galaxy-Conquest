@@ -3,11 +3,64 @@ var Graph = (function() {
     let MarsObject = require("./MarsObject.js");
     let _ = require("./underscore-extended.js");
     
-    class Graph extends MarsObject {
-        constructor(cfg = {}) {
-            super(cfg);
+    var Graph = (function() {
+        
+        let _proto = {
+            add(objs) {
+                for (let obj of objs) {
+                    if (obj instanceof Graph.Node) {
+                        this.nodes.push(obj);
+                    } else if (obj instanceof Graph.Edge) {
+                        this.edges.push(obj);
+                    }
+                }
+            },
+            remove(objs) {
+                let nodeUids = [];
+                let edgeUids = [];
+                
+                for (let obj of objs) {
+                    if (obj instanceof Graph.Node) {
+                        nodeUids.push(obj._uid);
+                    } else if (obj instanceof Graph.Edge) {
+                        edgeUids.push(obj._uid);
+                    }
+                }
+                
+                this.nodes = this.nodes
+                    .filter(node => nodeUids.indexOf(node._uid) === -1);
+                this.edges = this.edges
+                    .filter(edge => edgeUids.indexOf(edge._uid) === -1);
+            }
+        };
+        
+        class Graph extends MarsObject {
+            constructor(cfg = {}) {
+                super(cfg);
+                this.nodes = [];
+                this.edges = [];
+            }
+            add() {
+                if (arguments.length === 1 && _.isArray(arguments[0])) {
+                    _proto.add.call(this, arguments[0]);
+                } else {
+                    _proto.add.call(this, _.toArray(arguments));
+                }
+                
+                return this;
+            }
+            remove() {
+                if (arguments.length === 1 && _.isArray(arguments[0])) {
+                    _proto.remove.call(this, arguments[0]);
+                } else {
+                    _proto.remove.call(this, _.toArray(arguments));
+                }
+            }
         }
-    }
+        
+        return Graph;
+        
+    })();
     
     
     
