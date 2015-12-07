@@ -1,116 +1,5 @@
-var MarsObject = (function() {
+var EventObject = (function() {
     
-    let _ = require("./underscore-extended.js");
-    
-    let DataObject = require("./DataObject.js");
-
-    let UIDGenerator = require("./UIDGenerator");
-    
-    const CALLBACK_UID_KEY = "_mars_graph_callback_uid";
-    
-    let uidGenerator = new UIDGenerator({
-        sequenceLength: 30
-    });
-    
-    /*
-     Adds a callback UID property to a function or all elements of an array so
-     we can keep track of our callbacks and do cool stuff with them
-     */
-    function callbackify(callback) {
-        if (_.isFunction(callback)) {
-            if (!callback[CALLBACK_UID_KEY]) {
-                callback[CALLBACK_UID_KEY] = uidGenerator.generate();
-            }
-        } else if (_.isArray(callback)) {
-            callback.map(fn => {
-                if (!fn[CALLBACK_UID_KEY]) {
-                    fn[CALLBACK_UID_KEY] = uidGenerator.generate();
-                }
-            });
-        }
-        return callback;
-    }
-    
-    /*
-     Gets the keys for the different check (set, get, verify) events for a
-     specific path.
-     */
-    function getCheckKeys(self, path) {
-        let setKey = `${CHANGE_UID_PREFIX}${path}_set`;
-        let getKey = `${CHANGE_UID_PREFIX}${path}_get`;
-        let verifyKey = `${CHANGE_UID_PREFIX}${path}_verify`;
-        let init = false;
-        
-        if (self._checks[verifyKey] === undefined) {
-            init = true;
-            self._checks[verifyKey] = [];
-        }
-        if (self._checks[getKey] === undefined) {
-            init = true;
-            self._checks[getKey] = [];
-        }
-        if (self._checks[setKey] === undefined) {
-            init = true;
-            self._checks[setKey] = [];
-        }
-        
-        return [getKey, setKey, verifyKey, init];
-    }
-    
-    /*
-     Attaches getter and setter methods to a property on an object so we can
-     fire events and mess with things when someone tries to do something with
-     it.
-     */
-    function attachAccessors(self, path, [getKey, setKey, verifyKey]) {
-        let {ref, key} = _.getPathData(self._data, path);
-        
-        if (ref === undefined) {
-            return self;
-        }
-        
-        let val = ref[key];
-        
-        Object.defineProperty(ref, key, {
-            set(nVal) {
-                if (self._checks[verifyKey] !== undefined) {
-                    for (let check of self._checks[verifyKey]) {
-                        if (!check(nVal)) {
-                            return;
-                        }
-                    }
-                }
-                
-                if (self._checks[setKey] !== undefined) {
-                    for (let processor of self._checks[setKey]) {
-                        let possible = processor(nVal);
-                        
-                        if (possible !== undefined) {
-                            nVal = possible;
-                        }
-                    }
-                }
-                
-                val = nVal;
-            },
-            get() {
-                let retVal = val;
-                
-                if (self._checks[getKey] !== undefined) {
-                    for (let fetcher of self._checks[getKey]) {
-                        retVal = fetcher(val);
-                    }
-                }
-                
-                return retVal;
-            }
-        });
-    }
-    
-    /*
-     `_proto` is an object containing methods that we would like to use in
-     MarsObject but don't necessarily want being exposed to the whole world
-     and cluttering things up */
     let _proto = {
         /*
          Used by the `on` method when only one argument is given.
@@ -262,19 +151,13 @@ var MarsObject = (function() {
         }
     };
     
-    class MarsObject extends DataObject {
+    class EventObject {
         constructor(cfg = {}) {
-            super(cfg);
-            let {data = {}, listen = {}, checks = {}, change = {}} = cfg;
-        
-            this._listeners = {};
-            this._uid = uidGenerator.generate();
+            let {listen = {}} = cfg;
             
-            for (let evt in listen) {
-                if (listen.hasOwnProperty(evt)) {
-                    this.on(evt, listen[evt]);
-                }
-            }
+            this._listeners = [];
+            
+            this.on(listen);
         }
         /*
          Description:
@@ -346,7 +229,7 @@ var MarsObject = (function() {
         }
     }
     
-    module.exports = MarsObject;
-    return MarsObject;
-
+    module.exports = EventObject;
+    return EventObject;
+    
 })();

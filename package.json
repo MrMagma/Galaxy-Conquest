@@ -34,6 +34,7 @@
     "gulp-util": "^3.0.7",
     "jshint": "^2.8.0",
     "lodash": "^3.10.1",
+    "mixin": "^0.2.0",
     "mocha": "^2.3.4"
   },
   "license": "MIT"

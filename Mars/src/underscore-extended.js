@@ -4,6 +4,7 @@ var _ = (function() {
        both */
     var lodash = require("lodash");
     var underscore = require("underscore");
+    var mixin = require("mixin");
     
     var _ = underscore.extendOwn(lodash, underscore, {
         getPathParent(obj, path = "") {
@@ -46,6 +47,17 @@ var _ = (function() {
                         _.walkJSON(json[key], walker, valPath);
                     }
                 }
+            }
+        },
+        mix() {
+            if (arguments.length > 0) {
+                let current = arguments[0];
+                
+                for (let i = 1; i < arguments.length; i++) {
+                    current = mixin(current, arguments[i]);
+                }
+                
+                return current;
             }
         }
     });
