@@ -1,58 +1,93 @@
 var MarsGame = (function() {
     
-    function Mars(cfg = {}) {
-        this._fps = 30;
-        this._frameInterval = 1000 / this._fps;
-    }
+    var _ = require("./underscore-extended.js")
     
-    Mars.prototype = {
-        /* Sets the FPS (if a the value argument is supplied) and returns the
-           current FPS no matter what */
-        FPS(value) {
-            let type = typeof value;
-            if (type === "number" || type === "string") {            
-                if (typeof value === "string") {
-                    value = parseInt(value);
-                    if (isNaN(value)) {
-                        console.error("Please supply a valid value to the \"FPS\" method");
-                        return;
-                    }
-                }
-                this._fps = value;
-                this._frameInterval = 1000 / this._fps;
-            }
-            return this._fps;
-        },
-        /* Sets a method to run when the game first starts up, before any resources
-           have been loaded */
-        init() {
-            
-        },
-        /* Sets a method to run when all resources have been loaded and the game
-           is ready to go */
-        load() {
-            
-        },
-        /* Sets a method to run whenever progress is made on any resources the
-           game has been told to load */
-        progress() {
-            
-        },
-        /* Sets a method to run every frame */
-        update() {
-            
-        },
-        /* Method to add a resource to the queue of resources to fetch before
-           the game loads */
-        preload() {
-            
-        },
-        /* Method to asynchrynously load a resource */
-        load() {
-            
+    var MarsObject = require("./MarsObject.js");
+    
+    let _proto = {
+        runLoop() {
+            this.data().frameCount += 1;
+            this.fire("update", {
+                frameCount: this.data().frameCount
+            });
+            setTimeout(this.runLoop.bind(this),
+                1000 / this.data().fps);
         }
     };
     
-    module.exports = Mars;
-    return Mars;
+    class MarsGame extends MarsObject {
+        constructor(cfg) {
+            super(cfg);
+            let {fps = 60, update = () => {}} = cfg;
+            this.data({
+                fps: fps,
+                frameCount: 0,
+                dead: false
+            });
+            this.check({
+                fps(v) {
+                    return (_.isNumber(v) && v > 0);
+                },
+                dead(v, pVal) {
+                    // Don't allow people to "revive" a game object.
+                    //                           v
+                    return (!_.isBoolean(v) && !pVal);
+                },
+                frameCount(v) {
+                    return (_.isNumber(v) && v > 0);
+                }
+            });
+            _proto.runLoop.call(this);
+        }
+        /*
+         Gets and optionally sets the frames per second of the main game loop.
+         Usage:
+            fps()
+                Returns the frames per second value.
+            fps(newFps)
+                Sets the frames per second value to `newFps`.
+         */
+        fps(val) {
+            this.data("fps", val);
+            return this.data("fps");
+        }
+        /*
+         Shortcut for adding listeners for the update event.
+         Usage:
+            addUpdate(callback)
+                Adds the callback as a listener for the update event.
+            addUpdate(callbacks)
+                Adds all valid callbacks in the callbacks list as a listener
+                for the update event.
+         */
+        addUpdate(cb) {
+            this.on("update", cb)
+        }
+        /*
+         Shortcut for removing listeners from the update event.
+         Usage:
+            removeUpdate(callback)
+                Removes the callback from the update event.
+            removeUpdate(callbacks)
+                Removes all valid callbacks in the callbacks list from the
+                update event.
+         */
+        removeUpdate(cb) {
+            this.off("update", cb);
+        }
+        /*
+         Marks this game object as "dead", preventing any loops from
+         continuing.
+         Usage:
+            kill()
+                Kills this game object.
+         */
+        kill() {
+            this.data("dead", true);
+        }
+    }
+    
+    module.exports = MarsGame;
+    return MarsGame;
+    
 })();

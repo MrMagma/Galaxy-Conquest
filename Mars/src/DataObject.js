@@ -48,7 +48,7 @@ var DataObject = (function() {
             set(nVal) {
                 if (self._checks[verifyKey] !== undefined) {
                     for (let check of self._checks[verifyKey]) {
-                        if (!check(nVal)) {
+                        if (!check(nVal, val)) {
                             return;
                         }
                     }
@@ -56,7 +56,7 @@ var DataObject = (function() {
                 
                 if (self._checks[setKey] !== undefined) {
                     for (let processor of self._checks[setKey]) {
-                        let possible = processor(nVal);
+                        let possible = processor(nVal, val);
                         
                         if (possible !== undefined) {
                             nVal = possible;
