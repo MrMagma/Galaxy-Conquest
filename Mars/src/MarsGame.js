@@ -4,19 +4,8 @@ var MarsGame = (function() {
     
     var MarsObject = require("./MarsObject.js");
     
-    let _proto = {
-        runLoop() {
-            this.data().frameCount += 1;
-            this.fire("update", {
-                frameCount: this.data().frameCount
-            });
-            setTimeout(this.runLoop.bind(this),
-                1000 / this.data().fps);
-        }
-    };
-    
     class MarsGame extends MarsObject {
-        constructor(cfg) {
+        constructor(cfg = {}) {
             super(cfg);
             let {fps = 60, update = () => {}} = cfg;
             this.data({
@@ -37,7 +26,9 @@ var MarsGame = (function() {
                     return (_.isNumber(v) && v > 0);
                 }
             });
-            _proto.runLoop.call(this);
+            this._frameTimeout = null;
+            // Start up the game loop.
+            this.runLoop();
         }
         /*
          Gets and optionally sets the frames per second of the main game loop.
@@ -84,6 +75,20 @@ var MarsGame = (function() {
          */
         kill() {
             this.data("dead", true);
+        }
+        /*
+         Runs the game loop. Should only be used internally.
+         Usage:
+            runLoop()
+                Runs one frame of the game loop.
+         */
+        runLoop() {
+            this.data().frameCount += 1;
+            this.fire("update", {
+                frameCount: this.data().frameCount
+            });
+            this._frameTimeout = setTimeout(this.runLoop.bind(this),
+                1000 / this.data().fps);
         }
     }
     
