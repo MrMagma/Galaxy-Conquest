@@ -1,6 +1,7 @@
 var DataObject = (function() {
     
     let _ = require("./underscore-extended.js");
+    let EventObject = require("./EventObject.js");
     
     const CHANGE_UID_PREFIX = "mars_data_object_change_uid_";
     
@@ -65,6 +66,12 @@ var DataObject = (function() {
                 }
                 
                 val = nVal;
+                
+                self.emit(["change", `change:${path}`], {
+                    value: nVal,
+                    path: path,
+                    key: key
+                });
             },
             get() {
                 let retVal = val;
@@ -243,8 +250,9 @@ var DataObject = (function() {
         }
     };
     
-    class DataObject {
+    class DataObject extends EventObject {
         constructor(cfg = {}) {
+            super(cfg);
             let {data = {}, checks = {}, change = {}, fetch = {}} = cfg;
             
             this._data = {};
@@ -351,6 +359,58 @@ var DataObject = (function() {
                 _proto.checkKey.apply(this, arguments);
             }
             return this;
+        }
+        /*
+         Description:
+            Shortcut for adding data change listeners to a DataObject.
+         Usage:
+            onChange(callback)
+                Adds the callback(s) as listener(s) for any change events on this
+                DataObject.
+            onChange(paths, callback)
+                Adds the callback(s) as listener(s) for any changes on the path(s)
+                supplied as the first argument
+         */
+        onChange() {
+            if (arguments.length === 1) {
+                this.on("change", arguments[0]);
+            } else if (arguments.length === 2) {
+                if (!_.isArray(arguments[0])) {
+                    arguments[0] = [arguments[0]];
+                }
+                
+                let paths = arguments[0].filter(path => _.isString(path));
+                
+                for (let path of paths) {
+                    this.on(`change:path`, arguments[1]);
+                }
+            }
+        }
+        /*
+         Description:
+            Shortcut for removing data change listeners from a DataObject.
+         Usage:
+            offChange(callback)
+                Removes the callback(s) as listener(s) for any change events on this
+                DataObject.
+            offChange(paths, callback)
+                Removes the callback(s) as listener(s) for any changes on the path(s)
+                supplied as the first argument
+         */
+        offChange() {
+            if (arguments.length === 1) {
+                this.off("change", arguments[0]);
+            } else if (arguments.length === 2) {
+                if (!_.isArray(arguments[0])) {
+                    arguments[0] = [arguments[0]];
+                }
+                
+                let paths = arguments[0].filter(path => _.isString(path));
+                
+                for (let path of paths) {
+                    this.off(`change:path`, arguments[1]);
+                }
+            }
         }
     }
     

@@ -21,7 +21,7 @@ var Unit = (function() {
                 return;
             }
             
-            class Unit extends unitTypes[base] {
+            class Unit extends UnitTypes[base] {
                 constructor(cfg) {
                     super(cfg);
                     this.type = type;

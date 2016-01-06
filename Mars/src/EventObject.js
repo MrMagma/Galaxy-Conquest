@@ -1,5 +1,34 @@
 var EventObject = (function() {
     
+    let _ = require("./underscore-extended.js");
+    
+    let UIDGenerator = require("./UIDGenerator");
+    
+    const CALLBACK_UID_KEY = "_mars_event_callback_uid";
+    
+    let uidGenerator = new UIDGenerator({
+        sequenceLength: 30
+    });
+    
+    /*
+     Adds a callback UID property to a function or all elements of an array so
+     we can keep track of our callbacks and do cool stuff with them
+     */
+    function callbackify(callback) {
+        if (_.isFunction(callback)) {
+            if (!callback[CALLBACK_UID_KEY]) {
+                callback[CALLBACK_UID_KEY] = uidGenerator.generate();
+            }
+        } else if (_.isArray(callback)) {
+            callback.map(fn => {
+                if (!fn[CALLBACK_UID_KEY]) {
+                    fn[CALLBACK_UID_KEY] = uidGenerator.generate();
+                }
+            });
+        }
+        return callback;
+    }
+    
     let _proto = {
         /*
          Used by the `on` method when only one argument is given.
@@ -226,6 +255,16 @@ var EventObject = (function() {
             }
             
             return this;
+        }
+        /*
+         Description:
+            Another method of calling the fire method.
+         Usage:
+            emit([arg1[, arg2[, ...argN]]])
+                Calls the fire method with the given arguments.
+         */
+        emit() {
+            this.fire.apply(this, _.toArray(arguments));
         }
     }
     
