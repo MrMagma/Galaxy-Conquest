@@ -1,1 +1,1 @@
-"use strict";(function(){var MarsEngine=require("../../Mars/build/MarsEngine.js");})();
+"use strict";var MarsEngine=require("../../Mars/build/MarsEngine.js");
